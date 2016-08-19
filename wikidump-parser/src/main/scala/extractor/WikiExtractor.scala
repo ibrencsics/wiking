@@ -1,6 +1,7 @@
 package extractor
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.util.matching.Regex
 
 
 object Line {
@@ -13,16 +14,19 @@ object Line {
   }
 }
 
-case class Template(name: String, data: List[String])
+//case class Template(name: String, data: List[String])
 case class ParsedTemplate(name: String, data: List[(String, List[Element])])
 
 sealed trait Element
 case class Link(page: String, plain: Option[String]) extends Element
+case class Template(data: String) extends Element
 case class OfCombined(name: Element, country: Element) extends Element
 case class Text(plain: String) extends Element
 case class Sep(data: String) extends Element
 case class Of(plain: String) extends Element
 case class Lf(plain: String) extends Element
+case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
+case class Timeframe(from: Date, to: Date) extends Element
 
 
 class FreeText(/*data: List[Element]*/)
@@ -31,10 +35,21 @@ object FreeText {
 
   type Free = List[Element]
 
-  val REGEXP_SEP = """^\s*(,)|(and)\s*$""".r
+  val REGEXP_SEP = """^\s*(,)$|^(and)\s*$""".r
   val REGEXP_OF = """^of\s*(the)*$""".r
-  val REGEXP_LF = """(&lt;br\s*/{0,1}&gt;)|(\\n)|(&lt;!--.*--&gt;)""".r
+  val REGEXP_LF = """(&lt;br\s*/{0,1}&gt;)|(\\n)|(&lt;!--.*--&gt;)""".r // the last of is comment
   val REGEXP_SMALL = """&lt;/?small\s*/{0,1}&gt;""".r
+
+  val R_YEAR = "(\\d{1,4})"
+  val R_MONTH = "([Jj]anuary|[Ff]ebruary|[Mm]arch|[Aa]pril|[Mm]ay|[Jj]une|[Jj]uly|[Aa]ugust|[Ss]eptember|[Oo]ctober|[Nn]ovember|[Dd]ecember)"
+  val R_DAY = "(\\d{1,2}|\\d{1,2}\\sor\\s\\d{1,2})" //\\s+(or\\s+\\d{1,2}))"
+  val R_AD_BC = "(AD|BC)?"
+  val R_DATE = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC)
+  val R_FROM_TO = new Regex(R_DATE.regex + "\\s*[–-]\\s*" + R_DATE.regex)
+
+  val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "–" + R_YEAR + "\\s?" + R_AD_BC)
+
+  // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
   def unapply(raw: String): Option[List[Element]] = {
 
@@ -51,13 +66,40 @@ object FreeText {
 
       if (REGEXP_SEP.findFirstIn(trimmed).nonEmpty) {
         elems += Sep(trimmed)
+
       } else if (REGEXP_OF.findFirstIn(trimmed).nonEmpty) {
         elems += Of(trimmed)
+
 //      } else if (RegexHelper.Lf.findFirstIn(trimmed).nonEmpty) {
 //        elems += Lf(trimmed)
+
+      } else if (R_FROM_TO.findFirstIn(trimmed).nonEmpty) {
+        R_FROM_TO.findAllIn(trimmed).matchData foreach {
+          m => elems += Timeframe(
+            Date(m.group(1), m.group(2), m.group(3), isAd(m.group(4))),
+            Date(m.group(5), m.group(6), m.group(7), isAd(m.group(8))))
+        }
+
+      } else if (R_DATE.findFirstIn(trimmed).nonEmpty) {
+        R_DATE.findAllIn(trimmed).matchData foreach {
+          m => elems += Date(m.group(1), m.group(2), m.group(3), isAd(m.group(4)))
+        }
+
+      } else if (R_FROM_TO_YEARS_ONLY.findFirstIn(trimmed).nonEmpty) {
+        R_FROM_TO_YEARS_ONLY.findAllIn(trimmed).matchData foreach {
+          m => elems += Timeframe(Date("", "", m.group(1), isAd(m.group(3))), Date("", "", m.group(2), isAd(m.group(3))))
+        }
+
+//      } else if (new Regex(R_YEAR).findFirstIn(trimmed).nonEmpty) {
+//        new Regex(R_YEAR).findAllIn(trimmed).matchData foreach {
+//          m => elems += Date("", "", m.group(1), true)
+//        }
+
       } else if (trimmed.size > 0 || trimmed == ' ') {
         elems +=  Text(trimmed)
       }
+
+      def isAd(data: String): Boolean = data == null || (data != null && data == "AD")
     }
 
 
@@ -73,23 +115,23 @@ object FreeText {
 
     for (c: Char <- raw) {
       if (c equals '[') {
-//        println("'[' found")
-
-        if (buf.nonEmpty) {
-          freeElement()
-        }
-
+        if (buf.nonEmpty) freeElement()
         linkLevel += 1
       }
       else if (c equals ']') {
-//        println("']' found")
         linkLevel -= 1
+      }
+      else if (c equals '{') {
+        if (buf.nonEmpty) freeElement()
+        templateLevel += 1
+      }
+      else if (c equals '}') {
+        templateLevel -= 1
       }
 
       if (!linkPresent && linkLevel == 2) {
         linkPresent = true
         linkStart = pos + 1
-//        println(s"link start, linkStart = ${linkStart}")
       }
       else if (linkPresent && linkLevel == 0) {
         val link = raw.substring(linkStart, pos - 1)
@@ -97,11 +139,22 @@ object FreeText {
         elems += Link(split(0), if (split.size > 1) Option(split(1)) else Option.empty)
         linkPresent = false
       }
-      else if (!linkPresent && !c.equals('[') && !c.equals(']')) {
+      else if (!templatePresent && templateLevel == 2) {
+        templatePresent = true
+        templateStart = pos + 1
+      }
+      else if (templatePresent && templateLevel == 0) {
+        val template = raw.substring(templateStart, pos - 1)
+        elems += Template(template)
+        templatePresent = false
+      }
+      else if (!linkPresent && !templatePresent && !c.equals('[') && !c.equals(']') && !c.equals('{') && !c.equals('}')) {
         buf += c.toString
       }
 
-//      println(s"linklevel = ${linkLevel}, linkPresent = ${linkPresent}, linkStart = ${linkStart}")
+
+
+
       pos += 1
     }
 

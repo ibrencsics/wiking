@@ -154,7 +154,7 @@ class Royalty(builder: RoyaltyBuilder) {
     s"mother: ${mother}\n" +
     s"birthDate: ${birthDate}\n" +
     s"birthPlace: ${birthPlace}\n" +
-    s"deathDate: ${deathPlace}\n" +
+    s"deathDate: ${deathDate}\n" +
     s"deathPlace: ${deathPlace}\n" +
     s"religion: ${religion}\n"
   }
