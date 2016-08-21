@@ -27,7 +27,6 @@ case class Lf(plain: String) extends Element
 case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
 
-//case class BirthDateTemplate(date: Date) extends Element
 
 class FreeText(/*data: List[Element]*/)
 
@@ -44,18 +43,29 @@ object FreeText {
   val R_MONTH = "([Jj]anuary|[Ff]ebruary|[Mm]arch|[Aa]pril|[Mm]ay|[Jj]une|[Jj]uly|[Aa]ugust|[Ss]eptember|[Oo]ctober|[Nn]ovember|[Dd]ecember)"
   val R_DAY = "(\\d{1,2}|\\d{1,2}\\sor\\s\\d{1,2})"
   val R_AD_BC = "(AD|BC)?"
-  val R_DATE = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC + ".*")
-  val R_DATE_2 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR)
 
-  val R_FROM_TO = new Regex(R_DATE.regex + "\\s*[–-]\\s*" + R_DATE.regex + ".*")
+  // 11 September 1771
+  val R_DATE_1 = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC + ".*")
+  // May 20, 1851
+  val R_DATE_2 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
+  // 1806
+  val R_DATE_3 = """(\d{4})""".r
+  // July 4, 1873
+  val R_DATE_4 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
+  // c. 138 BC
+  // 78 BC (aged c. 60)
+
+  val R_FROM_TO = new Regex(R_DATE_1.regex + "\\s*[–-]\\s*" + R_DATE_1.regex + ".*")
   val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "–" + R_YEAR + "\\s?" + R_AD_BC + ".*")
 
-//  val R_T_BIRTH_DATE = """[Bb]irth\sdate\|(df=(ye?s?|no?)\|)?(mf=(ye?s?|no?)\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})(\|df=(ye?s?|no))?(\|mf=(ye?s?|no?))?""".r
-  val R_T_BIRTH_DATE = """[Bb]irth\sdate(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
-  val R_T_DEATH_DATE = """[Dd]eath\sdate\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
-  val R_T_DEATH_DATE_AND_AGE = """[Dd]eath\sdate(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})\|(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
-  val R_T_DEATH_YEAR = """[Dd]eath\syear(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,4}).*""".r
-  val R_T_NOWRAP = """nowrap\|(.*)""".r
+  val R_T_BIRTH_DATE = """[Bb]irth\sdate(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_DATE = """[Dd]eath\sdate\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_DATE_AND_AGE = """[Dd]eath\sdate(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})\|(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_YEAR = """[Dd]eath\syear(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,4}).*""".r
+  val R_T_BIRTH_DATE_AND_AGE = """BirthDeathAge\|(B|\s*)\|(\d{1,4})\|(\d{1,2}|\s*)\|(\d{1,2}|\s*)\|(\d{1,4})\|?(\d{1,2}|\s)?\|?(\d{1,2}|\s)?\|?.*""".r
+  val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
+  val R_T_DEATH_DASH_DATE = """[Dd]eath-date(\sand\sage)?\s*\|([^\|]*)\|?(.*)?""".r
+  val R_T_NOWRAP = """nowrap\s*\|(.*)""".r
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -77,7 +87,7 @@ object FreeText {
         case R_SEP(text) => elems += Sep(text)
         case R_OF(text, _) => elems += Of(text)
         case R_FROM_TO(d1, m1, y1, a1, d2, m2, y2, a2) => elems += Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2)))
-        case R_DATE(d, m, y, a) => elems += Date(d, m, y, isAd(a))
+        case R_DATE_1(d, m, y, a) => elems += Date(d, m, y, isAd(a))
         case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
         case R_FROM_TO_YEARS_ONLY(y1, y2, a) => elems += Timeframe(Date("", "", y1, isAd(a)), Date("", "", y2, isAd(a)))
         case text => if (text.size > 0 || text == " ") elems += Text(text)
@@ -91,10 +101,26 @@ object FreeText {
       case R_T_DEATH_DATE(_, y, m, d) => elems += Date(d, m, y, true)
       case R_T_DEATH_DATE_AND_AGE(_, _, y, m, d, _, _, _) => elems += Date(d, m, y, true)
       case R_T_DEATH_YEAR(_, _, dy, by) => elems += Date("", "", dy, true)
+      case R_T_BIRTH_DATE_AND_AGE(_, by, bm, bd, dy, dm, dd) => elems +=
+        Timeframe(Date(spaceToEmpty(bd), spaceToEmpty(bm), by, true), Date(spaceToEmpty(dd), spaceToEmpty(dm), dy, true))
+      case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
+      case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
       case t => elems += Template(t)
     }
 
+    def spaceToEmpty(t: String): String = if (t == null || t == " ") "" else t
+
+    def parseDate(d: String): Unit = {
+      println(s"${d}")
+      d match {
+        case R_DATE_1(d, m, y, _) => elems += Date(d, m, y, true)
+        case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
+        case R_DATE_4(m, d, y) => elems += Date(d, m, y, true)
+        case R_DATE_3(y) => elems += Date("", "", y, true)
+        case _ =>
+      }
+    }
 
     var pos = 0
 

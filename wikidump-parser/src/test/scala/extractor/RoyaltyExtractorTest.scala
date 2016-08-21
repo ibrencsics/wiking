@@ -262,35 +262,66 @@ object RoyaltyExtractorTest {
       )
     )
 
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n| birth_date     = {{BirthDeathAge|B|1397| | |1475|12|10|yes}} | death_date     = {{BirthDeathAge| |1397| | |1475|12|10|yes}}}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Date("26","4","1912",true)))
-//          .withDeathDate(List(Date("13","05","2001",true)))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n| birth_date     = {{BirthDeathAge|B|1397| | |1475|12|10|yes}} | death_date     = {{BirthDeathAge| |1397| | |1475|12|10|yes}}}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Timeframe(Date("","","1397",true), Date("10","12","1475",true))))
+          .withDeathDate(List(Timeframe(Date("","","1397",true), Date("10","12","1475",true))))
+          .build
+      )
+    )
 
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n| birth_date = {{BirthDeathAge|B|1466|||1530}}| death_date = {{BirthDeathAge||1466|||1530}}}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Date("26","4","1912",true)))
-//          .withDeathDate(List(Date("13","05","2001",true)))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n| birth_date = {{BirthDeathAge|B|1466|||1530}}| death_date = {{BirthDeathAge||1466|||1530}}}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Timeframe(Date("","","1466",true), Date("","","1530",true))))
+          .withDeathDate(List(Timeframe(Date("","","1466",true), Date("","","1530",true))))
+          .build
+      )
+    )
 
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n|birth_date        = {{BirthDeathAge|B|1932|4|27|1999|4|18|}}|death_date        = {{BirthDeathAge||1932|4|27|1999|4|18|}}}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Date("26","4","1912",true)))
-//          .withDeathDate(List(Date("13","05","2001",true)))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n|birth_date        = {{BirthDeathAge|B|1932|4|27|1999|4|18|}}|death_date        = {{BirthDeathAge||1932|4|27|1999|4|18|}}}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Timeframe(Date("27","4","1932",true), Date("18","4","1999",true))))
+          .withDeathDate(List(Timeframe(Date("27","4","1932",true), Date("18","4","1999",true))))
+          .build
+      )
+    )
+
+    list.add(
+      Array(
+        "{{Infobox royalty\n|birth_date        = {{Birth-date|August 20, 2009|August 20, 1913}}|death_date        = {{death-date|April 17, 1994|April 17, 1994}} (aged 80)}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Date("20","August","1913",true)))
+          .withDeathDate(List(Date("17","April","1994",true), Text("(aged 80)")))
+          .build
+      )
+    )
+
+    list.add(
+      Array(
+        "{{Infobox royalty\n|birth_date        = {{Birth-date|11 September 1771}}|death_date        = {{death-date|1806}} (aged 35)}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Date("11","September","1771",true)))
+          .withDeathDate(List(Date("","","1806",true), Text("(aged 35)")))
+          .build
+      )
+    )
+
+    list.add(
+      Array(
+        "{{Infobox royalty\n|birth_date    = {{Birth-date|May 20, 1851|May 20, 1851}}|death_date    = {{Death-date and age|August 3, 1929|May 20, 1851}}}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Date("20","May","1851",true)))
+          .withDeathDate(List(Date("20","May","1851",true)))
+          .build
+      )
+    )
+
 
     list
   }
