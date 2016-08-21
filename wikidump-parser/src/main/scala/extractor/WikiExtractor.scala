@@ -27,6 +27,7 @@ case class Lf(plain: String) extends Element
 case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
 
+//case class BirthDateTemplate(date: Date) extends Element
 
 class FreeText(/*data: List[Element]*/)
 
@@ -44,10 +45,20 @@ object FreeText {
   val R_DAY = "(\\d{1,2}|\\d{1,2}\\sor\\s\\d{1,2})"
   val R_AD_BC = "(AD|BC)?"
   val R_DATE = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC + ".*")
+  val R_DATE_2 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR)
+
   val R_FROM_TO = new Regex(R_DATE.regex + "\\s*[–-]\\s*" + R_DATE.regex + ".*")
   val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "–" + R_YEAR + "\\s?" + R_AD_BC + ".*")
 
+//  val R_T_BIRTH_DATE = """[Bb]irth\sdate\|(df=(ye?s?|no?)\|)?(mf=(ye?s?|no?)\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})(\|df=(ye?s?|no))?(\|mf=(ye?s?|no?))?""".r
+  val R_T_BIRTH_DATE = """[Bb]irth\sdate(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_DATE = """[Dd]eath\sdate\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_DATE_AND_AGE = """[Dd]eath\sdate(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})\|(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_DEATH_YEAR = """[Dd]eath\syear(\sand\sage)?\|(.*\|)?(\d{1,4})\|(\d{1,4}).*""".r
+  val R_T_NOWRAP = """nowrap\|(.*)""".r
+
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
+
 
   def unapply(raw: String): Option[List[Element]] = {
 
@@ -66,12 +77,22 @@ object FreeText {
         case R_SEP(text) => elems += Sep(text)
         case R_OF(text, _) => elems += Of(text)
         case R_FROM_TO(d1, m1, y1, a1, d2, m2, y2, a2) => elems += Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2)))
-        case R_DATE(d, m, q, a) => elems += Date(d, m, q, isAd(a))
+        case R_DATE(d, m, y, a) => elems += Date(d, m, y, isAd(a))
+        case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
         case R_FROM_TO_YEARS_ONLY(y1, y2, a) => elems += Timeframe(Date("", "", y1, isAd(a)), Date("", "", y2, isAd(a)))
         case text => if (text.size > 0 || text == " ") elems += Text(text)
       }
 
       def isAd(data: String): Boolean = data == null || (data != null && data == "AD")
+    }
+
+    def parseTemplate(text: String): Unit = text match {
+      case R_T_BIRTH_DATE(_, _, y, m, d) => elems += Date(d, m, y, true)
+      case R_T_DEATH_DATE(_, y, m, d) => elems += Date(d, m, y, true)
+      case R_T_DEATH_DATE_AND_AGE(_, _, y, m, d, _, _, _) => elems += Date(d, m, y, true)
+      case R_T_DEATH_YEAR(_, _, dy, by) => elems += Date("", "", dy, true)
+      case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
+      case t => elems += Template(t)
     }
 
 
@@ -117,8 +138,8 @@ object FreeText {
       }
       else if (templatePresent && templateLevel == 0) {
         val template = raw.substring(templateStart, pos - 1)
-        elems += Template(template)
         templatePresent = false
+        parseTemplate(template)
       }
       else if (!linkPresent && !templatePresent && !c.equals('[') && !c.equals(']') && !c.equals('{') && !c.equals('}')) {
         buf += c.toString
