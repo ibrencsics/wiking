@@ -58,12 +58,13 @@ object FreeText {
   val R_FROM_TO = new Regex(R_DATE_1.regex + "\\s*[–-]\\s*" + R_DATE_1.regex + ".*")
   val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "–" + R_YEAR + "\\s?" + R_AD_BC + ".*")
 
-  val R_T_BIRTH_DATE = """[Bb]irth\sdate(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_BIRTH_DATE = """[Bb]irth[\s_]date(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
+  val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
+  val R_T_BIRTH_DATE_AND_AGE = """BirthDeathAge\|(B|\s*)\|(\d{1,4})\|(\d{1,2}|\s*)\|(\d{1,2}|\s*)\|(\d{1,4})\|?(\d{1,2}|\s)?\|?(\d{1,2}|\s)?\|?.*""".r
+
   val R_T_DEATH_DATE = """[Dd]eath\sdate\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
   val R_T_DEATH_DATE_AND_AGE = """[Dd]eath\sdate(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2})\|(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
   val R_T_DEATH_YEAR = """[Dd]eath\syear(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,4}).*""".r
-  val R_T_BIRTH_DATE_AND_AGE = """BirthDeathAge\|(B|\s*)\|(\d{1,4})\|(\d{1,2}|\s*)\|(\d{1,2}|\s*)\|(\d{1,4})\|?(\d{1,2}|\s)?\|?(\d{1,2}|\s)?\|?.*""".r
-  val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
   val R_T_DEATH_DASH_DATE = """[Dd]eath-date(\sand\sage)?\s*\|([^\|]*)\|?(.*)?""".r
   val R_T_NOWRAP = """nowrap\s*\|(.*)""".r
 
@@ -112,7 +113,6 @@ object FreeText {
     def spaceToEmpty(t: String): String = if (t == null || t == " ") "" else t
 
     def parseDate(d: String): Unit = {
-      println(s"${d}")
       d match {
         case R_DATE_1(d, m, y, _) => elems += Date(d, m, y, true)
         case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
@@ -189,6 +189,7 @@ class WikiExtractor {
     def addToList(freetext: String, list: ListBuffer[(String, List[Element])]): Unit = {
       freetext match {
         case Line(elemName, FreeText(elemValue)) => list += ((elemName, elemValue))
+        case t => //println(s"\t${t}")
       }
     }
 
