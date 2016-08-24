@@ -26,6 +26,7 @@ case class Of(plain: String) extends Element
 case class Lf(plain: String) extends Element
 case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
+case class Circa(date: Date) extends Element
 
 
 class FreeText(/*data: List[Element]*/)
@@ -42,16 +43,21 @@ object FreeText {
   val R_YEAR = "(\\d{1,4})"
   val R_MONTH = "([Jj]anuary|[Ff]ebruary|[Mm]arch|[Aa]pril|[Mm]ay|[Jj]une|[Jj]uly|[Aa]ugust|[Ss]eptember|[Oo]ctober|[Nn]ovember|[Dd]ecember)"
   val R_DAY = "(\\d{1,2}|\\d{1,2}\\sor\\s\\d{1,2})"
-  val R_AD_BC = "(AD|BC)?"
+  val R_AD_BC = "(AD|BC|CE|BCE)?"
 
   // 11 September 1771
   val R_DATE_1 = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC + ".*")
   // May 20, 1851
   val R_DATE_2 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
   // 1806
-  val R_DATE_3 = """(\d{4})""".r
+//  val R_DATE_3 = """(\d{4})""".r
   // July 4, 1873
   val R_DATE_4 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
+  // 50 BC
+  val R_DATE_5 = new Regex(R_YEAR + "\\s?" + R_AD_BC)
+  // November 1204
+  val R_DATE_6 = new Regex(R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC)
+
   // c. 138 BC
   // 78 BC (aged c. 60)
 
@@ -67,6 +73,7 @@ object FreeText {
   val R_T_DEATH_YEAR = """[Dd]eath\syear(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,4}).*""".r
   val R_T_DEATH_DASH_DATE = """[Dd]eath-date(\sand\sage)?\s*\|([^\|]*)\|?(.*)?""".r
   val R_T_NOWRAP = """nowrap\s*\|(.*)""".r
+  val R_T_CIRCA = """circa""".r
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -97,6 +104,7 @@ object FreeText {
       case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
+      case R_T_CIRCA() => elems += Circa(null)
       case t => elems += Template(t)
     }
 
@@ -107,7 +115,9 @@ object FreeText {
       case R_DATE_1(d, m, y, a) => Option(Date(d, m, y, isAd(a)))
       case R_DATE_2(m, d, y) => Option(Date(d, m, y, true))
       case R_DATE_4(m, d, y) => Option(Date(d, m, y, true))
-      case R_DATE_3(y) => Option(Date("", "", y, true))
+//      case R_DATE_3(y) => Option(Date("", "", y, true))
+      case R_DATE_5(y, a) => Option(Date("", "", y, isAd(a)))
+      case R_DATE_6(m, y, a) => Option(Date("", m, y, isAd(a)))
 
       case _ => Option.empty
     }
@@ -115,13 +125,13 @@ object FreeText {
     def parseMisc(raw: String): Option[Element] = raw match {
       case R_SEP(text) => Option(Sep(text))
       case R_OF(text, _) => Option(Of(text))
-      case text if (text.size > 0 || text == " ") => Option(Text(text))
+      case text if text.nonEmpty => Option(Text(text))
       case _ => Option.empty
     }
 
     def spaceToEmpty(t: String): String = if (t == null || t == " ") "" else t
 
-    def isAd(data: String): Boolean = data == null || (data != null && data == "AD")
+    def isAd(data: String): Boolean = data == null || (data != null && (data == "AD" || data == "CE"))
 
 
 
