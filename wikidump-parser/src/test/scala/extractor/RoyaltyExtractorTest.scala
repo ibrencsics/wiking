@@ -100,7 +100,7 @@ object RoyaltyExtractorTest {
           // mother       = [[Eleanor of Alburquerque]]
           .withMother(List(Link("Eleanor of Alburquerque", None)))
           // birth_date   = 1396
-          .withBirthDate(List(Text("1396")))
+          .withBirthDate(List(Date("","","1396",true)))
           // birth_place  = [[Medina del Campo]], [[Kingdom of Castile]]
           .withBirthPlace(List(Link("Medina del Campo", None), Sep(","), Link("Kingdom of Castile", None)))
           // death_date   = 27 June {{death year and age|df=yes|1458|1396}}

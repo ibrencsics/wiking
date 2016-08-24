@@ -84,17 +84,7 @@ object FreeText {
       val smallRemoved = R_SMALL.replaceAllIn(text, " ")
       val trimmed = R_LF.replaceAllIn(smallRemoved, " ").trim
 
-      trimmed match {
-        case R_SEP(text) => elems += Sep(text)
-        case R_OF(text, _) => elems += Of(text)
-        case R_FROM_TO(d1, m1, y1, a1, d2, m2, y2, a2) => elems += Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2)))
-        case R_DATE_1(d, m, y, a) => elems += Date(d, m, y, isAd(a))
-        case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
-        case R_FROM_TO_YEARS_ONLY(y1, y2, a) => elems += Timeframe(Date("", "", y1, isAd(a)), Date("", "", y2, isAd(a)))
-        case text => if (text.size > 0 || text == " ") elems += Text(text)
-      }
-
-      def isAd(data: String): Boolean = data == null || (data != null && data == "AD")
+      parseDate(trimmed).orElse(parseMisc(trimmed)).foreach(elems += _)
     }
 
     def parseTemplate(text: String): Unit = text match {
@@ -104,23 +94,36 @@ object FreeText {
       case R_T_DEATH_YEAR(_, _, dy, by) => elems += Date("", "", dy, true)
       case R_T_BIRTH_DATE_AND_AGE(_, by, bm, bd, dy, dm, dd) => elems +=
         Timeframe(Date(spaceToEmpty(bd), spaceToEmpty(bm), by, true), Date(spaceToEmpty(dd), spaceToEmpty(dm), dy, true))
-      case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
-      case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
+      case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
+      case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
       case t => elems += Template(t)
     }
 
+    def parseDate(raw: String): Option[Element] = raw match {
+      case R_FROM_TO(d1, m1, y1, a1, d2, m2, y2, a2) => Option(Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2))))
+      case R_FROM_TO_YEARS_ONLY(y1, y2, a) => Option(Timeframe(Date("", "", y1, isAd(a)), Date("", "", y2, isAd(a))))
+
+      case R_DATE_1(d, m, y, a) => Option(Date(d, m, y, isAd(a)))
+      case R_DATE_2(m, d, y) => Option(Date(d, m, y, true))
+      case R_DATE_4(m, d, y) => Option(Date(d, m, y, true))
+      case R_DATE_3(y) => Option(Date("", "", y, true))
+
+      case _ => Option.empty
+    }
+
+    def parseMisc(raw: String): Option[Element] = raw match {
+      case R_SEP(text) => Option(Sep(text))
+      case R_OF(text, _) => Option(Of(text))
+      case text if (text.size > 0 || text == " ") => Option(Text(text))
+      case _ => Option.empty
+    }
+
     def spaceToEmpty(t: String): String = if (t == null || t == " ") "" else t
 
-    def parseDate(d: String): Unit = {
-      d match {
-        case R_DATE_1(d, m, y, _) => elems += Date(d, m, y, true)
-        case R_DATE_2(m, d, y) => elems += Date(d, m, y, true)
-        case R_DATE_4(m, d, y) => elems += Date(d, m, y, true)
-        case R_DATE_3(y) => elems += Date("", "", y, true)
-        case _ =>
-      }
-    }
+    def isAd(data: String): Boolean = data == null || (data != null && data == "AD")
+
+
 
     var pos = 0
 
