@@ -45,7 +45,7 @@ object DateParserTest {
     list.add(Array("4 November 1265", List(Date("4","November","1265", true))))
     list.add(Array("20 or 21 July 356 BC", List(Date("20 or 21","July","356",false))))
 
-//    list.add(Array("1396", List(Date("","","1396", true))))
+    list.add(Array("1396", List(Date("","","1396",true))))
 //    list.add(Array("1 August AD 12", List()))
 //    list.add(Array("19 August AD 14 (aged 75)", List())
 
@@ -55,8 +55,8 @@ object DateParserTest {
 
 //    list.add(Array("c. 885 to 850 BC", List()))
 
-//    list.add(Array("[[circa|c.]] 1068", List()))
-//    list.add(Array("[[circa|c.]] 1127–1135", List()))
+    list.add(Array("[[circa|c.]] 1068", List(Link("circa",Some("c.")), Date("","","1068",true)))) // should be post processed
+    list.add(Array("[[circa|c.]] 1127–1135", List(Link("circa",Some("c.")), Timeframe(Date("","","1127",true), Date("","","1135",true))))) // should be post processed
 
     list.add(Array("{{circa}} 1177", List(Circa(null), Date("","","1177",true))))
     list.add(Array("{{circa}} 1165–1170", List(Circa(null), Timeframe(Date("","","1165",true), Date("","","1170",true)))))
@@ -65,10 +65,10 @@ object DateParserTest {
     list.add(Array("{{circa}} November 1204", List(Circa(null), Date("","November","1204",true))))
     list.add(Array("{{circa}} 870–80", List(Circa(null), Timeframe(Date("","","870",true), Date("","","80",true))))) // should be post processed
 
-//    list.add(Array("{{circa|1188}}", List()))
-//    list.add(Array("{{circa|893/895}}", List()))
-//    list.add(Array("{{circa|890s}}", List()))
-//    list.add(Array("{{circa|1182–4}}", List()))
+    list.add(Array("{{circa|1188}}", List(Circa(Date("","","1188",true)))))
+    list.add(Array("{{circa|893/895}}", List(Circa(Timeframe(Date("","","893",true), Date("","","895",true))))))
+    list.add(Array("{{circa|890s}}", List(Circa(Date("","","890",true)))))
+    list.add(Array("{{circa|1182–4}}", List(Circa(Timeframe(Date("","","1182",true), Date("","","4",true)))))) // should be post processed
 
 //    list.add(Array("circa 1161", List()))
 //    list.add(Array("circa 5 September 1201", List()))

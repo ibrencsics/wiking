@@ -26,7 +26,7 @@ case class Of(plain: String) extends Element
 case class Lf(plain: String) extends Element
 case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
-case class Circa(date: Date) extends Element
+case class Circa(date: Element) extends Element
 
 
 class FreeText(/*data: List[Element]*/)
@@ -54,7 +54,7 @@ object FreeText {
   // July 4, 1873
   val R_DATE_4 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
   // 50 BC
-  val R_DATE_5 = new Regex(R_YEAR + "\\s?" + R_AD_BC)
+  val R_DATE_5 = new Regex(R_YEAR + "s?" + "\\s?" + R_AD_BC)
   // November 1204
   val R_DATE_6 = new Regex(R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC)
 
@@ -62,7 +62,7 @@ object FreeText {
   // 78 BC (aged c. 60)
 
   val R_FROM_TO = new Regex(R_DATE_1.regex + "\\s*[–-]\\s*" + R_DATE_1.regex + ".*")
-  val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "–" + R_YEAR + "\\s?" + R_AD_BC + ".*")
+  val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "[–/]" + R_YEAR + "\\s?" + R_AD_BC + ".*")
 
   val R_T_BIRTH_DATE = """[Bb]irth[\s_]date(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
   val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
@@ -74,6 +74,7 @@ object FreeText {
   val R_T_DEATH_DASH_DATE = """[Dd]eath-date(\sand\sage)?\s*\|([^\|]*)\|?(.*)?""".r
   val R_T_NOWRAP = """nowrap\s*\|(.*)""".r
   val R_T_CIRCA = """circa""".r
+  val R_T_CIRCA_2 = """circa\|([^\|]+)""".r
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -104,6 +105,8 @@ object FreeText {
       case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
+//      case R_T_CIRCA_2(y) => elems += Circa(Date("","",y,true))
+      case R_T_CIRCA_2(y) => elems += parseDate(y).map(Circa(_)).getOrElse(Circa(null))
       case R_T_CIRCA() => elems += Circa(null)
       case t => elems += Template(t)
     }
