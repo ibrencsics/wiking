@@ -35,6 +35,9 @@ object FreeText {
 
   type Free = List[Element]
 
+  val R_LINK = """^\s*\[\[([^\[\]\|]+)\|?([^\[\]\|]*)\]\]\s*$""".r
+  val R_TEMPLATE = """^\s*\{\{(.*)\}\}\s*$""".r
+
   val R_SEP = """(^\s*,\s*$|^\s*and\s*$)""".r
   val R_OF = """(^of\s*(the)*$)""".r
 
@@ -90,34 +93,48 @@ object FreeText {
     val elems = ListBuffer[Element]()
     var buf = ArrayBuffer[String]()
 
-    def freeElement(): Unit = {
-      val text = buf.mkString
-      buf.clear()
 
-      val trimmed = text
-        .replaceAll(R_SMALL.regex, " ")
-        .replaceAll(R_LF.regex, " ")
-        .replaceAll(R_MISC.regex, " ")
-        .trim
+    def addBuffer(): Unit = {
+      def free(): String = {
+        val text = buf.mkString
+        buf.clear()
 
-      parseDate(trimmed).orElse(parseMisc(trimmed)).foreach(elems += _)
+        text
+          .replaceAll(R_SMALL.regex, " ")
+          .replaceAll(R_LF.regex, " ")
+          .replaceAll(R_MISC.regex, " ")
+          .trim
+      }
+
+      parse(free()).foreach(elems += _)
     }
 
-    def parseTemplate(text: String): Unit = text match {
-      case R_T_BIRTH_DATE(_, _, y, m, d) => elems += Date(d, m, y, true)
-      case R_T_DEATH_DATE(_, y, m, d) => elems += Date(d, m, y, true)
-      case R_T_DEATH_DATE_AND_AGE(_, _, y, m, d, _, _, _) => elems += Date(d, m, y, true)
-      case R_T_DEATH_YEAR(_, _, dy, by) => elems += Date("", "", dy, true)
-      case R_T_BIRTH_DATE_AND_AGE(_, by, bm, bd, dy, dm, dd) => elems +=
-        Timeframe(Date(spaceToEmpty(bd), spaceToEmpty(bm), by, true), Date(spaceToEmpty(dd), spaceToEmpty(dm), dy, true))
-      case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
-      case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
-      case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
-      case R_T_CIRCA_3(y1, y2, a) => elems += Circa(Timeframe(Date("","",y1,isAd(a)), Date("","",y2,isAd(a))))
+    def add(s: String): Unit = {
+      parse(s).foreach(elems += _)
+    }
+
+    def parse(text: String): Option[Element] = text match {
+      case R_LINK(name, page) if page.nonEmpty => Option(Link(name, Option(page)))
+      case R_LINK(name, page) => Option(Link(name, Option.empty))
+      case R_TEMPLATE(t) => parseTemplate(t)
+      case t: String => parseDate(t).orElse(parseMisc(t))
+    }
+
+    def parseTemplate(text: String): Option[Element] = text match {
+      case R_T_BIRTH_DATE(_, _, y, m, d) => Option(Date(d, m, y, true))
+      case R_T_DEATH_DATE(_, y, m, d) => Option(Date(d, m, y, true))
+      case R_T_DEATH_DATE_AND_AGE(_, _, y, m, d, _, _, _) => Option(Date(d, m, y, true))
+      case R_T_DEATH_YEAR(_, _, dy, by) => Option(Date("", "", dy, true))
+      case R_T_BIRTH_DATE_AND_AGE(_, by, bm, bd, dy, dm, dd) => Option(
+        Timeframe(Date(spaceToEmpty(bd), spaceToEmpty(bm), by, true), Date(spaceToEmpty(dd), spaceToEmpty(dm), dy, true)))
+      case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
+      case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2)
+      case R_T_NOWRAP(t) => parse(t)
+      case R_T_CIRCA_3(y1, y2, a) => Option(Circa(Timeframe(Date("","",y1,isAd(a)), Date("","",y2,isAd(a)))))
       case R_T_CIRCA_4(y) => parseTemplate(y)
-      case R_T_CIRCA_2(y) => elems += parseDate(y).map(Circa(_)).getOrElse(Circa(null))
-      case R_T_CIRCA() => elems += Circa(null)
-      case t => elems += Template(t)
+      case R_T_CIRCA_2(y) => parseDate(y).map(Circa).orElse(Option(Circa(null)))
+      case R_T_CIRCA() => Option(Circa(null))
+      case t => Option(Template(t))
     }
 
     def parseDate(raw: String): Option[Element] = raw match {
@@ -133,7 +150,7 @@ object FreeText {
       case R_DATE_6(m, y, a) => Option(Date("", m, y, isAd(a)))
       case R_DATE_7(d, m, a, y) => Option(Date(d, m, y, isAd(a)))
 
-      case R_CIRCA(pre, post) => parseDate(pre.trim + post.trim).map(Circa(_))
+      case R_CIRCA(pre, post) => parseDate(pre.trim + post.trim).map(Circa)
 
       case _ => Option.empty
     }
@@ -163,14 +180,14 @@ object FreeText {
 
     for (c: Char <- raw) {
       if (c equals '[') {
-        if (buf.nonEmpty) freeElement()
+        if (buf.nonEmpty) addBuffer()
         linkLevel += 1
       }
       else if (c equals ']') {
         linkLevel -= 1
       }
       else if (c equals '{') {
-        if (buf.nonEmpty) freeElement()
+        if (buf.nonEmpty) addBuffer()
         templateLevel += 1
       }
       else if (c equals '}') {
@@ -183,8 +200,7 @@ object FreeText {
       }
       else if (linkPresent && linkLevel == 0) {
         val link = raw.substring(linkStart, pos - 1)
-        val split = link.split("\\|")
-        elems += Link(split(0), if (split.size > 1) Option(split(1)) else Option.empty)
+        add(s"[[${link}]]")
         linkPresent = false
       }
       else if (!templatePresent && templateLevel == 2) {
@@ -193,8 +209,8 @@ object FreeText {
       }
       else if (templatePresent && templateLevel == 0) {
         val template = raw.substring(templateStart, pos - 1)
+        add(s"{{${template}}}")
         templatePresent = false
-        parseTemplate(template)
       }
       else if (!linkPresent && !templatePresent && !c.equals('[') && !c.equals(']') && !c.equals('{') && !c.equals('}')) {
         buf += c.toString
@@ -203,8 +219,8 @@ object FreeText {
       pos += 1
     }
 
-    if (elems.isEmpty) freeElement()
-    if (buf.nonEmpty) freeElement()
+    if (elems.isEmpty) addBuffer()
+    if (buf.nonEmpty) addBuffer()
 
     Some(elems.result)
   }

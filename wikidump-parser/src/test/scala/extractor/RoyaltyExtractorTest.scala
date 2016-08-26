@@ -17,9 +17,7 @@ class RoyaltyExtractorTest(p1: Object, p2: Object) extends JUnitSuite {
     val royalty = new RoyaltyExtractor().extract(p1.asInstanceOf[String])
     val expRoyalty: Royalty = p2.asInstanceOf[Royalty]
 
-//    assertTrue(royalty == expRoyalty)
     assertEquals(expRoyalty, royalty)
-
 //    println(royalty)
   }
 }
@@ -331,16 +329,15 @@ object RoyaltyExtractorTest {
       )
     )
 
-    // under development in DateParserTest
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n|birth_date    = {{birth_date|1460|5|8|df=yes}}|death_date = {{circa|{{death year and age|1353|1291}}}}}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Date("8","5","1460",true)))
-//          .withDeathDate(List(Date("","","1353",true)))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n|birth_date    = {{birth_date|1460|5|8|df=yes}}|death_date = {{circa|{{death year and age|1353|1291}}}}}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Date("8","5","1460",true)))
+          .withDeathDate(List(Date("","","1353",true))) // should be wrapped to Circa()
+          .build
+      )
+    )
 
 
 // |reign-type      = 1st reign
