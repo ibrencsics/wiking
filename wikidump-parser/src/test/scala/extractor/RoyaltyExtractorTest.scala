@@ -222,15 +222,14 @@ object RoyaltyExtractorTest {
       )
     )
 
-    // non-parseable
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n| birth_date    = 16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Text("16 January 27 BC – 19 August AD 14")))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n| birth_date    = 16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Timeframe(Date("16","January","27",false), Date("19","August","14",true))))
+          .build
+      )
+    )
 
     list.add(
       Array(
@@ -322,16 +321,17 @@ object RoyaltyExtractorTest {
       )
     )
 
-//    list.add(
-//      Array(
-//        "{{Infobox royalty\n| birth_date      = 31 August AD 12| death_date      = 24 January AD 41 (age 28)}}",
-//        new RoyaltyBuilder()
-//          .withBirthDate(List(Date("20","May","1851",true)))
-//          .withDeathDate(List(Date("20","May","1851",true)))
-//          .build
-//      )
-//    )
+    list.add(
+      Array(
+        "{{Infobox royalty\n| birth_date      = 31 August AD 12| death_date      = 24 January AD 41 (age 28)}}",
+        new RoyaltyBuilder()
+          .withBirthDate(List(Date("31","August","12",true)))
+          .withDeathDate(List(Date("24","January","41",true)))
+          .build
+      )
+    )
 
+    // under development in DateParserTest
 //    list.add(
 //      Array(
 //        "{{Infobox royalty\n|birth_date    = {{birth_date|1460|5|8|df=yes}}|death_date = {{circa|{{death year and age|1353|1291}}}}}}",
@@ -342,16 +342,6 @@ object RoyaltyExtractorTest {
 //      )
 //    )
 
-// | birth_date = [[circa|c.]] 1068
-// | reign                = {{circa}} 1344 – {{circa}} 1390
-// | reign                = {{circa}} 1351 – 1395/96
-// | birth_date    = {{circa|268|232 BCE}}{{sfn|Upinder Singh|2008|p=331}}
-// | reign                = 29 March 1367 – {{circa}} October 1375
-// | reign                = 1330s – 1340s
-// | reign        = c. 1780 - 1806
-// | birth_date= 1136
-// | birth_date  = ({{OldStyleDate|28 February|1690|18 February}} | death_date  = {{OldStyleDate|7 July|1718|26 June}}) &lt;br/&gt;(aged 28)
-// | birth_date  = {{circa}} 1177
 
 // |reign-type      = 1st reign
 // |reign           = 13 September 1438 – &lt;br&gt; 11 November 1477

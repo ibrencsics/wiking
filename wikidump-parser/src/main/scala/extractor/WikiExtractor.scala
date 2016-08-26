@@ -80,6 +80,7 @@ object FreeText {
   val R_T_CIRCA = """circa""".r
   val R_T_CIRCA_2 = """circa\|([^\|]+)""".r
   val R_T_CIRCA_3 = new Regex("circa\\|" + R_YEAR + "\\|" + R_YEAR + "\\s*" + R_AD_BC + "?.*")
+  val R_T_CIRCA_4 = """circa\|\{\{([^\{\}]+)\}\}""".r
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -113,6 +114,7 @@ object FreeText {
       case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
       case R_T_CIRCA_3(y1, y2, a) => elems += Circa(Timeframe(Date("","",y1,isAd(a)), Date("","",y2,isAd(a))))
+      case R_T_CIRCA_4(y) => parseTemplate(y)
       case R_T_CIRCA_2(y) => elems += parseDate(y).map(Circa(_)).getOrElse(Circa(null))
       case R_T_CIRCA() => elems += Circa(null)
       case t => elems += Template(t)

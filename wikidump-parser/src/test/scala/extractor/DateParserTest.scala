@@ -86,6 +86,8 @@ object DateParserTest {
 
     list.add(Array("27 June {{death year and age|df=yes|1458|1396}}", List(Text("27 June"), Date("","","1458",true)))) // should be post processed
 
+    list.add(Array("{{circa|{{death year and age|1353|1291}}}}", List((Date("","","1353",true))))) // should be wrapped to Circa()
+
     list.add(Array("434–453", List(Timeframe(Date("", "", "434", true), Date("", "", "453", true)))))
     list.add(Array("16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
       List(Timeframe(Date("16","January","27",false), Date("19","August","14",true)))))
