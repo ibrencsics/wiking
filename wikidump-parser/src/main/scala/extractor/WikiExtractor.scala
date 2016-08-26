@@ -37,32 +37,36 @@ object FreeText {
 
   val R_SEP = """(^\s*,\s*$|^\s*and\s*$)""".r
   val R_OF = """(^of\s*(the)*$)""".r
-  val R_LF = """(&lt;br\s*/{0,1}&gt;)|(\\n)|(&lt;!--.*--&gt;)""".r // the last of is comment
+
+  val R_LF = """(&lt;br\s*/{0,1}&gt;)|(\\n)""".r
   val R_SMALL = """&lt;/?small\s*/{0,1}&gt;""".r
+  val R_MISC = """(&lt;!--.*--&gt;)|(&amp;)|(nbsp;)|(''\(uncertain\)'')""".r
 
   val R_YEAR = "(\\d{1,4})"
   val R_MONTH = "([Jj]anuary|[Ff]ebruary|[Mm]arch|[Aa]pril|[Mm]ay|[Jj]une|[Jj]uly|[Aa]ugust|[Ss]eptember|[Oo]ctober|[Nn]ovember|[Dd]ecember)"
   val R_DAY = "(\\d{1,2}|\\d{1,2}\\sor\\s\\d{1,2})"
-  val R_AD_BC = "(AD|BC|CE|BCE)?"
+  val R_AD_BC = "(AD|BC|CE|BCE)"
 
   // 11 September 1771
-  val R_DATE_1 = new Regex(R_DAY + "\\s" + R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC + ".*")
+  val R_DATE_1 = new Regex(R_DAY + "\\s*" + R_MONTH + "\\s*" + R_YEAR + "\\s?" + R_AD_BC + "?.*")
   // May 20, 1851
-  val R_DATE_2 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
-  // 1806
-//  val R_DATE_3 = """(\d{4})""".r
+  val R_DATE_2 = new Regex(R_MONTH + "\\s*" + R_DAY + ",\\s*" + R_YEAR + ".*")
   // July 4, 1873
-  val R_DATE_4 = new Regex(R_MONTH + "\\s" + R_DAY + ",\\s" + R_YEAR + ".*")
+  val R_DATE_4 = new Regex(R_MONTH + "\\s*" + R_DAY + ",\\s*" + R_YEAR + ".*")
   // 50 BC
-  val R_DATE_5 = new Regex(R_YEAR + "s?" + "\\s?" + R_AD_BC)
+  val R_DATE_5 = new Regex("\\s*" + R_YEAR + "s*" + "\\s*" + R_AD_BC + "?")
+  // 50 -
+  val R_DATE_5_DASH = new Regex("\\s*" + R_YEAR + "s*" + "\\s*" + R_AD_BC + "?\\s*–")
   // November 1204
-  val R_DATE_6 = new Regex(R_MONTH + "\\s" + R_YEAR + "\\s?" + R_AD_BC)
+  val R_DATE_6 = new Regex(R_MONTH + "\\s*" + R_YEAR + "\\s*?" + R_AD_BC + "?")
+  // 1 August AD 12
+  val R_DATE_7 = new Regex(R_DAY + "\\s*" + R_MONTH + "\\s*" + R_AD_BC + "\\s*" + R_YEAR + ".*")
 
-  // c. 138 BC
-  // 78 BC (aged c. 60)
+  val R_CIRCA = """(.*)\bcirca\b(.*)""".r
 
   val R_FROM_TO = new Regex(R_DATE_1.regex + "\\s*[–-]\\s*" + R_DATE_1.regex + ".*")
-  val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "[–/]" + R_YEAR + "\\s?" + R_AD_BC + ".*")
+  val R_FROM_TO_AROUND_ZERO = new Regex(R_DATE_1.regex + "\\s*[–-]\\s*" + R_DATE_7.regex + ".*")
+  val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "[–/]" + R_YEAR + "\\s?" + R_AD_BC + "?.*")
 
   val R_T_BIRTH_DATE = """[Bb]irth[\s_]date(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
   val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
@@ -75,6 +79,7 @@ object FreeText {
   val R_T_NOWRAP = """nowrap\s*\|(.*)""".r
   val R_T_CIRCA = """circa""".r
   val R_T_CIRCA_2 = """circa\|([^\|]+)""".r
+  val R_T_CIRCA_3 = new Regex("circa\\|" + R_YEAR + "\\|" + R_YEAR + "\\s*" + R_AD_BC + "?.*")
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -88,9 +93,11 @@ object FreeText {
       val text = buf.mkString
       buf.clear()
 
-      // eliminate line feed
-      val smallRemoved = R_SMALL.replaceAllIn(text, " ")
-      val trimmed = R_LF.replaceAllIn(smallRemoved, " ").trim
+      val trimmed = text
+        .replaceAll(R_SMALL.regex, " ")
+        .replaceAll(R_LF.regex, " ")
+        .replaceAll(R_MISC.regex, " ")
+        .trim
 
       parseDate(trimmed).orElse(parseMisc(trimmed)).foreach(elems += _)
     }
@@ -105,7 +112,7 @@ object FreeText {
       case R_T_BIRTH_DASH_DATE(d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_DEATH_DASH_DATE(_, d1, d2) => parseDate(if (d2==null || d2=="") d1 else d2).foreach(elems += _)
       case R_T_NOWRAP(t) => buf.clear(); buf += t; freeElement()
-//      case R_T_CIRCA_2(y) => elems += Circa(Date("","",y,true))
+      case R_T_CIRCA_3(y1, y2, a) => elems += Circa(Timeframe(Date("","",y1,isAd(a)), Date("","",y2,isAd(a))))
       case R_T_CIRCA_2(y) => elems += parseDate(y).map(Circa(_)).getOrElse(Circa(null))
       case R_T_CIRCA() => elems += Circa(null)
       case t => elems += Template(t)
@@ -113,14 +120,18 @@ object FreeText {
 
     def parseDate(raw: String): Option[Element] = raw match {
       case R_FROM_TO(d1, m1, y1, a1, d2, m2, y2, a2) => Option(Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2))))
+      case R_FROM_TO_AROUND_ZERO(d1, m1, y1, a1, d2, m2, a2, y2) => Option(Timeframe(Date(d1, m1, y1, isAd(a1)), Date(d2, m2, y2, isAd(a2))))
       case R_FROM_TO_YEARS_ONLY(y1, y2, a) => Option(Timeframe(Date("", "", y1, isAd(a)), Date("", "", y2, isAd(a))))
 
       case R_DATE_1(d, m, y, a) => Option(Date(d, m, y, isAd(a)))
       case R_DATE_2(m, d, y) => Option(Date(d, m, y, true))
       case R_DATE_4(m, d, y) => Option(Date(d, m, y, true))
-//      case R_DATE_3(y) => Option(Date("", "", y, true))
+      case R_DATE_5_DASH(y, a) => Option(Date("", "", y, isAd(a)))
       case R_DATE_5(y, a) => Option(Date("", "", y, isAd(a)))
       case R_DATE_6(m, y, a) => Option(Date("", m, y, isAd(a)))
+      case R_DATE_7(d, m, a, y) => Option(Date(d, m, y, isAd(a)))
+
+      case R_CIRCA(pre, post) => parseDate(pre.trim + post.trim).map(Circa(_))
 
       case _ => Option.empty
     }

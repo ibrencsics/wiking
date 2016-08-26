@@ -46,12 +46,12 @@ object DateParserTest {
     list.add(Array("20 or 21 July 356 BC", List(Date("20 or 21","July","356",false))))
 
     list.add(Array("1396", List(Date("","","1396",true))))
-//    list.add(Array("1 August AD 12", List()))
-//    list.add(Array("19 August AD 14 (aged 75)", List())
+    list.add(Array("1 August AD 12", List(Date("1","August","12",true))))
+    list.add(Array("19 August AD 14 (aged 75)", List(Date("19","August","14",true))))
 
-//    list.add(Array("{{circa|268|232 BCE}}", List()))
-//    list.add(Array("{{circa|340|317 BC}}", List()))
-//    list.add(Array("{{circa|606|647 CE}}", List()))
+    list.add(Array("{{circa|268|232 BCE}}", List(Circa(Timeframe(Date("","","268",false), Date("","","232",false))))))
+    list.add(Array("{{circa|340|317 BC}}", List(Circa(Timeframe(Date("","","340",false), Date("","","317",false))))))
+    list.add(Array("{{circa|606|647 CE}}", List(Circa(Timeframe(Date("","","606",true), Date("","","647",true))))))
 
 //    list.add(Array("c. 885 to 850 BC", List()))
 
@@ -70,23 +70,27 @@ object DateParserTest {
     list.add(Array("{{circa|890s}}", List(Circa(Date("","","890",true)))))
     list.add(Array("{{circa|1182–4}}", List(Circa(Timeframe(Date("","","1182",true), Date("","","4",true)))))) // should be post processed
 
-//    list.add(Array("circa 1161", List()))
-//    list.add(Array("circa 5 September 1201", List()))
-//    list.add(Array("21 September circa 130", List()))
+    list.add(Array("circa 1161", List(Circa(Date("","","1161",true)))))
+    list.add(Array("circa 5 September 1201", List(Circa(Date("5","September","1201",true)))))
+    list.add(Array("21 September circa 130", List(Circa(Date("21","September","130",true)))))
 
 
-//    list.add(Array("{{circa| 936}} – {{circa| 958}}", List()))
-//    list.add(Array("{{circa}} 907&amp;nbsp;– {{circa}} 950 ''(uncertain)''", List()))
+    list.add(Array("{{circa| 936}} – {{circa| 958}}",
+      List(Circa(Date("","","936",true)), Text("–"), Circa(Date("","","958",true))))) // should be post processed
+    list.add(Array("{{circa}} 907&amp;nbsp;– {{circa}} 950 ''(uncertain)''",
+      List(Circa(null), Date("","","907",true), Circa(null), Date("","","950",true)))) // should be post processed
 
 
 //    list.add(Array("({{OldStyleDate|28 February|1690|18 February}} | death_date  = {{OldStyleDate|7 July|1718|26 June}}) &lt;br/&gt;(aged 28)", List()))
 
 
-//    list.add(Array("27 June {{death year and age|df=yes|1458|1396}}", List(Date("","","1458",true))))
+    list.add(Array("27 June {{death year and age|df=yes|1458|1396}}", List(Text("27 June"), Date("","","1458",true)))) // should be post processed
 
     list.add(Array("434–453", List(Timeframe(Date("", "", "434", true), Date("", "", "453", true)))))
-//    list.add(Array("16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}", List()))
-//    list.add(Array("{{nowrap|22 June 1691 – 6 February 1695}}", List()))
+    list.add(Array("16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
+      List(Timeframe(Date("16","January","27",false), Date("19","August","14",true)))))
+
+    list.add(Array("{{nowrap|22 June 1691 – 6 February 1695}}", List(Timeframe(Date("22","June","1691",true), Date("6","February","1695",true)))))
 
     list
   }

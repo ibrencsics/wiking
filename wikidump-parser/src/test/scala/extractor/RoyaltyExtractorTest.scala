@@ -216,7 +216,7 @@ object RoyaltyExtractorTest {
       Array(
         "{{Infobox royalty\n| birth_date    = {{circa|268|232 BCE}}{{sfn|Upinder Singh|2008|p=331}} |death_date=February 14, 1009}}",
         new RoyaltyBuilder()
-          .withBirthDate(List(Template("circa|268|232 BCE"), Template("sfn|Upinder Singh|2008|p=331")))
+          .withBirthDate(List(Circa(Timeframe(Date("","","268",false), Date("","","232",false))), Template("sfn|Upinder Singh|2008|p=331")))
             .withDeathDate(List(Date("14","February","1009",true)))
           .build
       )
