@@ -229,15 +229,24 @@ object FreeText {
 
 class WikiExtractor {
 
+  def addToList(freetext: String, list: ListBuffer[(String, List[Element])]): Unit = {
+    parseLine(freetext).foreach(list += _)
+  }
+
+  def parseLine(freetext: String): Option[(String, List[Element])] = freetext match {
+    case Line(elemName, FreeText(elemValue)) => Option((elemName, postProcess(elemValue)))
+//    case Line(elemName, FreeText(elemValue)) => Option((elemName, elemValue))
+    case t => Option.empty
+  }
+
+  def postProcess(toBePostProcessed: List[Element]): List[Element] = {
+    toBePostProcessed
+      .foldLeft(List[Element]())((l,r) =>
+        if (l.size > 0 && l.last == Link("circa",Some("c.")) && (r.isInstanceOf[Date] || r.isInstanceOf[Timeframe])) l :+ Circa(r) else l :+ r)
+      .filter(_ != Link("circa",Some("c.")))
+  }
+
   def parseTemplate(text: String): ParsedTemplate = {
-
-    def addToList(freetext: String, list: ListBuffer[(String, List[Element])]): Unit = {
-      freetext match {
-        case Line(elemName, FreeText(elemValue)) => list += ((elemName, elemValue))
-        case t => //println(s"\t${t}")
-      }
-    }
-
     var level = 0
     var pos = 0
     var startPos = -1

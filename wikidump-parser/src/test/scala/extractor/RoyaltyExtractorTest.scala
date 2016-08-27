@@ -234,7 +234,7 @@ object RoyaltyExtractorTest {
         "{{Infobox royalty\n| birth_date    = c. 885 to 850 BC |death_date={{death date and age|df=yes|1621|9|17|1542|10|4}}&lt;br&gt;[[Rome]], Italy}}",
         new RoyaltyBuilder()
           .withBirthDate(List(Text("c. 885 to 850 BC")))
-            .withDeathDate(List(Date("17","9","1621",true), Link("Rome", None), Text(", Italy")))
+          .withDeathDate(List(Date("17","9","1621",true), Link("Rome", None), Text(", Italy")))
           .build
       )
     )
