@@ -24,7 +24,7 @@ case class Text(plain: String) extends Element
 case class Sep(data: String) extends Element
 case class Of(plain: String) extends Element
 case class Lf(plain: String) extends Element
-case class Date(year: String, month: String, day: String, ad: Boolean) extends Element
+case class Date(day: String, month: String, year: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
 case class Circa(date: Element) extends Element
 
@@ -240,10 +240,40 @@ class WikiExtractor {
   }
 
   def postProcess(toBePostProcessed: List[Element]): List[Element] = {
+
+    def processCirca(l: List[Element], r: Element)(elem: Element): List[Element] =
+      if (l.nonEmpty && l.last == elem && (r.isInstanceOf[Date] || r.isInstanceOf[Timeframe])) l :+ Circa(r) else l :+ r
+
+    def processRelativeFromToYearInternal(f: Date, t: Date): Date = {
+      if (isNull(f.day) && isNull(f.month) && !isNull(f.year) && isNull(t.day) && isNull(t.month) && !isNull(t.year)) {
+        val fromYear = Integer.valueOf(f.year)
+        val toYear = Integer.valueOf(t.year)
+
+        if (f.ad && t.ad && toYear - fromYear < 0) {
+          val newToYear = fromYear - (fromYear % (Math.pow(10, t.year.size).toInt)) + toYear
+          Date("","",s"${newToYear}",true)
+        } else {
+          t
+        }
+      } else {
+        t
+      }
+    }
+
+    def isNull(elem: String): Boolean = elem.isEmpty || elem == "" || elem == " "
+
+    def processRelativeFromToYear(elem : Element): Element = elem match {
+      case Circa(Timeframe(f,t)) => Circa(Timeframe(f,processRelativeFromToYearInternal(f,t)))
+      case Timeframe(f,t) => Timeframe(f,processRelativeFromToYearInternal(f,t))
+      case _ => elem
+    }
+
     toBePostProcessed
-      .foldLeft(List[Element]())((l,r) =>
-        if (l.size > 0 && l.last == Link("circa",Some("c.")) && (r.isInstanceOf[Date] || r.isInstanceOf[Timeframe])) l :+ Circa(r) else l :+ r)
+      .foldLeft(List[Element]())((l,r) => processCirca(l,r)(Link("circa",Some("c."))))
       .filter(_ != Link("circa",Some("c.")))
+      .foldLeft(List[Element]())((l,r) => processCirca(l,r)(Circa(null)))
+      .filter(_ != Circa(null))
+      .map(processRelativeFromToYear)
   }
 
   def parseTemplate(text: String): ParsedTemplate = {

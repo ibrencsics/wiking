@@ -62,17 +62,17 @@ object DateParserTest {
     list.add(Array("[[circa|c.]] 1068", List(Circa(Date("","","1068",true))))) // postprocessed
     list.add(Array("[[circa|c.]] 1127–1135", List(Circa(Timeframe(Date("","","1127",true), Date("","","1135",true)))))) // postprocessed
 
-    list.add(Array("{{circa}} 1177", List(Circa(null), Date("","","1177",true))))
-    list.add(Array("{{circa}} 1165–1170", List(Circa(null), Timeframe(Date("","","1165",true), Date("","","1170",true)))))
-    list.add(Array("{{circa}} 50 BC", List(Circa(null), Date("","","50",false))))
-    list.add(Array("{{circa}}1074", List(Circa(null), Date("","","1074",true))))
-    list.add(Array("{{circa}} November 1204", List(Circa(null), Date("","November","1204",true))))
-    list.add(Array("{{circa}} 870–80", List(Circa(null), Timeframe(Date("","","870",true), Date("","","80",true))))) // should be post processed
+    list.add(Array("{{circa}} 1177", List(Circa(Date("","","1177",true))))) // postprocessed
+    list.add(Array("{{circa}} 1165–1170", List(Circa(Timeframe(Date("","","1165",true), Date("","","1170",true)))))) // postprocessed
+    list.add(Array("{{circa}} 50 BC", List(Circa(Date("","","50",false))))) // postprocessed
+    list.add(Array("{{circa}}1074", List(Circa(Date("","","1074",true))))) // postprocessed
+    list.add(Array("{{circa}} November 1204", List(Circa(Date("","November","1204",true))))) // postprocessed
+    list.add(Array("{{circa}} 870–80", List(Circa(Timeframe(Date("","","870",true), Date("","","880",true)))))) // postprocessed
 
     list.add(Array("{{circa|1188}}", List(Circa(Date("","","1188",true)))))
     list.add(Array("{{circa|893/895}}", List(Circa(Timeframe(Date("","","893",true), Date("","","895",true))))))
     list.add(Array("{{circa|890s}}", List(Circa(Date("","","890",true)))))
-    list.add(Array("{{circa|1182–4}}", List(Circa(Timeframe(Date("","","1182",true), Date("","","4",true)))))) // should be post processed
+    list.add(Array("{{circa|1182–4}}", List(Circa(Timeframe(Date("","","1182",true), Date("","","1184",true)))))) // postprocessed
 
     list.add(Array("circa 1161", List(Circa(Date("","","1161",true)))))
     list.add(Array("circa 5 September 1201", List(Circa(Date("5","September","1201",true)))))
@@ -82,7 +82,7 @@ object DateParserTest {
     list.add(Array("{{circa| 936}} – {{circa| 958}}",
       List(Circa(Date("","","936",true)), Text("–"), Circa(Date("","","958",true))))) // should be post processed
     list.add(Array("{{circa}} 907&amp;nbsp;– {{circa}} 950 ''(uncertain)''",
-      List(Circa(null), Date("","","907",true), Circa(null), Date("","","950",true)))) // should be post processed
+      List(Circa(Date("","","907",true)), Circa(Date("","","950",true))))) // postprocessed + should be further postprocessed
 
 
     // misc

@@ -33,6 +33,22 @@ object PostProcessTest {
 //      List(Link("circa",Some("c.")), Timeframe(Date("","","1127",true), Date("","","1135",true)))))
       List(Circa(Timeframe(Date("","","1127",true), Date("","","1135",true))))))
 
+    list.add(Array("{{circa}} 1177",
+//      List(Circa(null), Date("","","1177",true))))
+      List(Circa(Date("","","1177",true)))))
+
+    list.add(Array("{{circa}} 1165–1170",
+//      List(Circa(null), Timeframe(Date("","","1165",true), Date("","","1170",true)))))
+      List(Circa(Timeframe(Date("","","1165",true), Date("","","1170",true))))))
+
+    list.add(Array("{{circa|1182–4}}",
+//      List(Circa(Timeframe(Date("","","1182",true), Date("","","4",true))))))
+      List(Circa(Timeframe(Date("","","1182",true), Date("","","1184",true))))))
+
+    list.add(Array("{{circa}} 870–80",
+//      List(Circa(Timeframe(Date("","","870",true), Date("","","80",true))))))
+      List(Circa(Timeframe(Date("","","870",true), Date("","","880",true))))))
+
     list
   }
 }
