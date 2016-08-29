@@ -48,7 +48,8 @@ class RoyaltyBuilder {
   }
 
   def withSpouse(spouse: Free): RoyaltyBuilder = {
-    this.spouse = spouse
+    if (this.spouse != null) this.spouse = this.spouse ::: spouse
+    else this.spouse = spouse
     this
   }
 
@@ -166,9 +167,9 @@ object RoyaltyRegexHelper {
   val Successor = """successor(\d*)""".r
   val Reign = """reign(\d*)""".r
   val Title = """^title(\d*)$""".r
-  val Spouse = """^spouse$""".r
+  val Spouse = """^spouse""".r
   val Issue = """^issue$""".r
-  val House = """^house$""".r
+  val House = """^house$|^dynasty$""".r
   val Father = """^father$""".r
   val Mother = """^mother$""".r
   val Name = """^name$""".r

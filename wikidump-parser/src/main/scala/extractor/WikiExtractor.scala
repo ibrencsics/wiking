@@ -27,6 +27,7 @@ case class Lf(plain: String) extends Element
 case class Date(day: String, month: String, year: String, ad: Boolean) extends Element
 case class Timeframe(from: Date, to: Date) extends Element
 case class Circa(date: Element) extends Element
+case class People(people: List[Element]) extends Element
 
 
 class FreeText(/*data: List[Element]*/)
@@ -35,13 +36,14 @@ object FreeText {
 
   type Free = List[Element]
 
-  val R_LINK = """^\s*\[\[([^\[\]\|]+)\|?([^\[\]\|]*)\]\]\s*$""".r
+  val R_LINK = """^\s*\[\[([^\[\]\|]+)\|?([^\[\]\|]*)\]\].*$""".r
   val R_TEMPLATE = """^\s*\{\{(.*)\}\}\s*$""".r
 
   val R_SEP = """(^\s*,\s*$|^\s*and\s*$)""".r
   val R_OF = """(^of\s*(the)*$)""".r
 
-  val R_LF = """(&lt;br\s*/{0,1}&gt;)|(\\n)""".r
+  val R_LF_BR = """(&lt;br\s*/{0,1}&gt;)""".r
+  val R_LF_N = """\\n|\n""".r
   val R_SMALL = """&lt;/?small\s*/{0,1}&gt;""".r
   val R_MISC = """(&lt;!--.*--&gt;)|(&amp;)|(nbsp;)|(''\(uncertain\)'')""".r
 
@@ -72,7 +74,7 @@ object FreeText {
   val R_FROM_TO_YEARS_ONLY = new Regex(R_YEAR + "\\s?" + "[–/]" + R_YEAR + "\\s?" + R_AD_BC + "?.*")
 
   val R_T_BIRTH_DATE = """[Bb]irth[\s_]date(\sand\sage)?\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
-  val R_T_BIRTH_DASH_DATE = """Birth-date\|([^\|]*)\|?(.*)?""".r
+  val R_T_BIRTH_DASH_DATE = """[Bb]irth-date\|([^\|]*)\|?(.*)?""".r
   val R_T_BIRTH_DATE_AND_AGE = """BirthDeathAge\|(B|\s*)\|(\d{1,4})\|(\d{1,2}|\s*)\|(\d{1,2}|\s*)\|(\d{1,4})\|?(\d{1,2}|\s)?\|?(\d{1,2}|\s)?\|?.*""".r
 
   val R_T_DEATH_DATE = """[Dd]eath\sdate\s*\|(.*\|)?(\d{1,4})\|(\d{1,2})\|(\d{1,2}).*""".r
@@ -84,6 +86,9 @@ object FreeText {
   val R_T_CIRCA_2 = """circa\|([^\|]+)""".r
   val R_T_CIRCA_3 = new Regex("circa\\|" + R_YEAR + "\\|" + R_YEAR + "\\s*" + R_AD_BC + "?.*")
   val R_T_CIRCA_4 = """circa\|\{\{([^\{\}]+)\}\}""".r
+  val R_T_PLAINLIST = """plainlist(.*)""".r
+
+  val R_LIST_ELEM = """\*([^\*]*)""".r
 
   // http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
 
@@ -99,18 +104,20 @@ object FreeText {
         val text = buf.mkString
         buf.clear()
 
-        text
-          .replaceAll(R_SMALL.regex, " ")
-          .replaceAll(R_LF.regex, " ")
-          .replaceAll(R_MISC.regex, " ")
-          .trim
+        clean(text)
       }
 
-      parse(free()).foreach(elems += _)
+      free().split(R_LF_BR.regex).flatMap(parse(_)).foreach(elems += _)
     }
 
+    def clean(s: String): String = s
+      .replaceAll(R_SMALL.regex, " ")
+      .replaceAll(R_LF_N.regex, " ")
+      .replaceAll(R_MISC.regex, " ")
+      .trim
+
     def add(s: String): Unit = {
-      parse(s).foreach(elems += _)
+      parse(clean(s)).foreach(elems += _)
     }
 
     def parse(text: String): Option[Element] = text match {
@@ -134,6 +141,7 @@ object FreeText {
       case R_T_CIRCA_4(y) => parseTemplate(y)
       case R_T_CIRCA_2(y) => parseDate(y).map(Circa).orElse(Option(Circa(null)))
       case R_T_CIRCA() => Option(Circa(null))
+      case R_T_PLAINLIST(l) => parseList(l)
       case t => Option(Template(t))
     }
 
@@ -153,6 +161,22 @@ object FreeText {
       case R_CIRCA(pre, post) => parseDate(pre.trim + post.trim).map(Circa)
 
       case _ => Option.empty
+    }
+
+    def parseList(s: String): Option[People] = {
+      def removeTailingComma(s: String): String = {
+        if (s.endsWith(",")) s.substring(0, s.length-1)
+        else s
+      }
+
+      val list = ListBuffer[Element]()
+
+      R_LIST_ELEM.findAllIn(s).foreach(_ match {
+        case R_LIST_ELEM(c) => parse(removeTailingComma(c.trim)).foreach(list += _)
+        case _ =>
+      })
+
+      Option(People(list.toList))
     }
 
     def parseMisc(raw: String): Option[Element] = raw match {
@@ -194,16 +218,7 @@ object FreeText {
         templateLevel -= 1
       }
 
-      if (!linkPresent && linkLevel == 2) {
-        linkPresent = true
-        linkStart = pos + 1
-      }
-      else if (linkPresent && linkLevel == 0) {
-        val link = raw.substring(linkStart, pos - 1)
-        add(s"[[${link}]]")
-        linkPresent = false
-      }
-      else if (!templatePresent && templateLevel == 2) {
+      if (!templatePresent && templateLevel == 2) {
         templatePresent = true
         templateStart = pos + 1
       }
@@ -211,6 +226,15 @@ object FreeText {
         val template = raw.substring(templateStart, pos - 1)
         add(s"{{${template}}}")
         templatePresent = false
+      }
+      else if (!linkPresent && !templatePresent && linkLevel == 2) {
+        linkPresent = true
+        linkStart = pos + 1
+      }
+      else if (linkPresent && !templatePresent && linkLevel == 0) {
+        val link = raw.substring(linkStart, pos - 1)
+        add(s"[[${link}]]")
+        linkPresent = false
       }
       else if (!linkPresent && !templatePresent && !c.equals('[') && !c.equals(']') && !c.equals('{') && !c.equals('}')) {
         buf += c.toString

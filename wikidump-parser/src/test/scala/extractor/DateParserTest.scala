@@ -37,6 +37,7 @@ object DateParserTest {
     list.add(Array("{{Birth-date|August 20, 2009|August 20, 1913}}", List(Date("20","August","1913",true))))
     list.add(Array("{{Birth-date|11 September 1771}}", List(Date("11","September","1771",true))))
     list.add(Array("{{Birth-date|May 20, 1851|May 20, 1851}}", List(Date("20","May","1851",true))))
+    list.add(Array("{{birth-date|September 1156}}", List(Date("","September","1156",true))))
 
     list.add(Array("{{BirthDeathAge|B|1397| | |1475|12|10|yes}}", List(Timeframe(Date("","","1397",true), Date("10","12","1475",true)))))
     list.add(Array("{{BirthDeathAge|B|1466|||1530}}", List(Timeframe(Date("","","1466",true), Date("","","1530",true)))))
@@ -94,7 +95,7 @@ object DateParserTest {
 
     list.add(Array("434–453", List(Timeframe(Date("", "", "434", true), Date("", "", "453", true)))))
     list.add(Array("16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
-      List(Timeframe(Date("16","January","27",false), Date("19","August","14",true)))))
+      List(Date("16","January","27",false), Date("19","August","14",true)))) // can be post processed -> Timeframe
 
     list.add(Array("{{nowrap|22 June 1691 – 6 February 1695}}", List(Timeframe(Date("22","June","1691",true), Date("6","February","1695",true)))))
 

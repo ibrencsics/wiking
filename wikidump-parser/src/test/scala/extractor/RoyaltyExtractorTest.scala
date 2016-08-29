@@ -174,170 +174,92 @@ object RoyaltyExtractorTest {
     )
 
     list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{birth date|1809|2|12}}}}",
+      Array("""
+{{Infobox monarch
+|name            =Isaac II Angelos&lt;br/&gt;Ισαάκιος Β’ Άγγελος
+|title           =[[Byzantine Emperor|Emperor]] of the [[Byzantine Empire]]
+|image= Isaac_II_Angelos.jpg
+|caption         =
+|reign           =1185–1195&lt;br/&gt;1203–1204
+|predecessor     =[[Andronikos I Komnenos]]
+|successor       =[[Alexios III Angelos]]
+|spouse 1        =?Herina
+|spouse 2        =[[Margaret of Hungary]] (renamed Maria)
+|issue           ={{plainlist|
+* Euphrosyne Angelina,
+* [[Irene Angelina]],
+* [[Alexius IV Angelus|Alexios IV Angelos]],
+* [[John Angelus of Syrmia|John Angelos]],
+* Manuel Angelos
+}}
+|dynasty         =[[Angelus (dynasty)|Angelos dynasty]]
+|father          =[[Andronikos Doukas Angelos]]
+|mother          =Euphrosyne Kastamonitissa
+|birth_date = {{birth-date|September 1156}}
+|death_date = {{death-date|January 1204}}
+}}""",
         new RoyaltyBuilder()
-          .withBirthDate(List(Date("12","2","1809",true)))
-          .build
-      )
-    )
+            .withName(List(Text("Isaac II Angelos"), Text("Ισαάκιος Β’ Άγγελος")))
+            .withPredecessor(0, List(Link("Andronikos I Komnenos", None)))
+            .withSuccessor(0, List(Link("Alexios III Angelos", None)))
+            .withReign(0, List(Timeframe(Date("","","1185",true), Date("","","1195",true)), Timeframe(Date("","","1203",true), Date("","","1204",true))))
+            .withSpouse(List(Text("?Herina"), Link("Margaret of Hungary", None), Text("(renamed Maria)")))
+            .withIssue(List(People(List(Text("Euphrosyne Angelina"), Link("Irene Angelina", None), Link("Alexius IV Angelus", Some("Alexios IV Angelos")), Link("John Angelus of Syrmia", Some("John Angelos")), Text("Manuel Angelos")))))
+            .withHouse(List(Link("Angelus (dynasty)", Some("Angelos dynasty"))))
+            .withFather(List(Link("Andronikos Doukas Angelos", None)))
+            .withMother(List(Text("Euphrosyne Kastamonitissa")))
+            .withBirthDate(List(Date("","September","1156",true)))
+            .withDeathDate(List(Date("","January","1204",true)))
+          .build))
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{birth date and age|1947|04|01|df=y}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("01","04","1947",true)))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{Birth date|df=yes|1885|4|3}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("3","4","1885",true)))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = 434–453 | death_date  = {{death date and age|df=yes|1670|2|9|1609|3|18}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("", "", "434", true), Date("", "", "453", true))))
-          .withDeathDate(List(Date("9","2","1670",true)))
-          .build
-      )
-    )
+    /*
+  {{Infobox monarch
+  |name            = Basil I
+  |succession      = [[Byzantine Emperor]]
+  |image           = Solidus-Basil I with Constantine and Eudoxia-sb1703.jpg
+  |caption         = Basil, his son Constantine, and his second wife, Empress Eudokia Ingerina.
+  |reign           = 867–886
+  |predecessor     = [[Michael III]]
+  |successor       = [[Leo VI the Wise]]
+  |queen           = [[Eudokia Ingerina]]
+  |spouse 1        = Maria
+  |spouse 2        = [[Eudokia Ingerina]]
+  |issue           = [[Leo VI the Wise|Emperor Leo VI]]&lt;br&gt;[[Alexander (Byzantine emperor)|Emperor Alexander]]&lt;br&gt;[[Stephen I of Constantinople|Patriarch Stephen I]]
+  |issue-link      =#Family
+  |dynasty         = [[Macedonian dynasty]]
+  |father          =
+  |mother          =
+  |birth_date      = 811
+  |birth_place     = [[Macedonia (theme)|Macedonia]]
+  |death_date      = {{death-date|August 29, 886|August 29, 886}} (aged 75)
+  |death_place     =
+  |date of burial  =
+  |place of burial =
+  |}}
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{circa|268|232 BCE}}{{sfn|Upinder Singh|2008|p=331}} |death_date=February 14, 1009}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Circa(Timeframe(Date("","","268",false), Date("","","232",false))), Template("sfn|Upinder Singh|2008|p=331")))
-            .withDeathDate(List(Date("14","February","1009",true)))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = 16 January 27 BC –&lt;br/&gt;19 August AD 14  &lt;small&gt;(40 years)&lt;/small&gt;}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("16","January","27",false), Date("19","August","14",true))))
-          .build
-      )
-    )
+  {{Infobox monarch
+  |name            =Leo V
+  |title           =[[Emperor]] of the [[Byzantine Empire]]
+  |image= Leo V solidus.jpg
+  |caption         =Gold ''[[solidus (coin)|solidus]]'' of Leo V, with his son and co-emperor, [[Constantine (son of Leo V)|Constantine]]
+  |reign           =813 – 25 December 820
+  |predecessor     =[[Michael I Rangabe]]
+  |successor       =[[Michael II]]
+  |queen           =[[Theodosia, wife of Leo V|Theodosia]]
+  |issue           =[[Constantine (son of Leo V)|Symbatios-Constantine]]&lt;br/&gt;Basil&lt;br/&gt;Gregory&lt;br/&gt;Theodosios
+  |father          =Bardas
+  |birth_date   =775
+  |death_date   =25 December 820 (aged 45)
+  |}}
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = c. 885 to 850 BC |death_date={{death date and age|df=yes|1621|9|17|1542|10|4}}&lt;br&gt;[[Rome]], Italy}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Text("c. 885 to 850 BC")))
-          .withDeathDate(List(Date("17","9","1621",true), Link("Rome", None), Text(", Italy")))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{nowrap|22 June 1691 – 6 February 1695}} |death_date={{death date|df=yes|814|2|18}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("22","June","1691",true), Date("6","February","1695",true))))
-          .withDeathDate(List(Date("18","2","814",true)))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date    = {{birth date|1912|4|26|mf=y}} | death_date  = {{death date and age|2001|05|13|1906|10|10|df=yes}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("26","4","1912",true)))
-          .withDeathDate(List(Date("13","05","2001",true)))
-          .build
-      )
-    )
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date     = {{BirthDeathAge|B|1397| | |1475|12|10|yes}} | death_date     = {{BirthDeathAge| |1397| | |1475|12|10|yes}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("","","1397",true), Date("10","12","1475",true))))
-          .withDeathDate(List(Timeframe(Date("","","1397",true), Date("10","12","1475",true))))
-          .build
-      )
-    )
+     */
 
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date = {{BirthDeathAge|B|1466|||1530}}| death_date = {{BirthDeathAge||1466|||1530}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("","","1466",true), Date("","","1530",true))))
-          .withDeathDate(List(Timeframe(Date("","","1466",true), Date("","","1530",true))))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n|birth_date        = {{BirthDeathAge|B|1932|4|27|1999|4|18|}}|death_date        = {{BirthDeathAge||1932|4|27|1999|4|18|}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Timeframe(Date("27","4","1932",true), Date("18","4","1999",true))))
-          .withDeathDate(List(Timeframe(Date("27","4","1932",true), Date("18","4","1999",true))))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n|birth_date        = {{Birth-date|August 20, 2009|August 20, 1913}}|death_date        = {{death-date|April 17, 1994|April 17, 1994}} (aged 80)}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("20","August","1913",true)))
-          .withDeathDate(List(Date("17","April","1994",true), Text("(aged 80)")))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n|birth_date        = {{Birth-date|11 September 1771}}|death_date        = {{death-date|1806}} (aged 35)}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("11","September","1771",true)))
-          .withDeathDate(List(Date("","","1806",true), Text("(aged 35)")))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n|birth_date    = {{Birth-date|May 20, 1851|May 20, 1851}}|death_date    = {{Death-date and age|August 3, 1929|May 20, 1851}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("20","May","1851",true)))
-          .withDeathDate(List(Date("20","May","1851",true)))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n| birth_date      = 31 August AD 12| death_date      = 24 January AD 41 (age 28)}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("31","August","12",true)))
-          .withDeathDate(List(Date("24","January","41",true)))
-          .build
-      )
-    )
-
-    list.add(
-      Array(
-        "{{Infobox royalty\n|birth_date    = {{birth_date|1460|5|8|df=yes}}|death_date = {{circa|{{death year and age|1353|1291}}}}}}",
-        new RoyaltyBuilder()
-          .withBirthDate(List(Date("8","5","1460",true)))
-          .withDeathDate(List(Date("","","1353",true))) // should be wrapped to Circa()
-          .build
-      )
-    )
 
 
 // |reign-type      = 1st reign

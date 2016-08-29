@@ -42,6 +42,14 @@ object PersonParserTest {
       List(Link("Roxana", None), Of("of"), Link("Bactria", None), Link("Stateira II", None), Of("of"), Link("Persia", None), Link("Parysatis II", None), Text("of Persia")))) // postprocess
     list.add(Array("[[Pella]], Macedon",
       List(Link("Pella", None), Text(", Macedon")))) // postprocess
+
+    list.add(Array("{{plainlist|\n* Euphrosyne Angelina,\n* [[Irene Angelina]],\n* [[Alexius IV Angelus|Alexios IV Angelos]],\n* [[John Angelus of Syrmia|John Angelos]],\n* Manuel Angelos\n}}",
+      List(People(List(Text("Euphrosyne Angelina"), Link("Irene Angelina", None), Link("Alexius IV Angelus", Some("Alexios IV Angelos")), Link("John Angelus of Syrmia", Some("John Angelos")), Text("Manuel Angelos"))))))
+    list.add(Array("{{plainlist | style = white-space: nowrap; |\n* [[Legion of Merit]]\n*[[Presidential Medal of Freedom]] (1968)\n}}",
+      List(People(List(Link("Legion of Merit", None), Link("Presidential Medal of Freedom", None))))))
+
+//    list.add(Array("{{plainlist|\n*{{marriage|[[Sonny Bono]]|1969|1975|reason=divorced}}\n*{{marriage|[[Gregg Allman]]|1975|1979|reason=divorced}}}}",
+//      List()))
 //    list.add(Array("", List()))
 
     list
