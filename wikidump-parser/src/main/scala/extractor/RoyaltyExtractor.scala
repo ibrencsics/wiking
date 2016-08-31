@@ -168,7 +168,7 @@ object RoyaltyRegexHelper {
   val Reign = """reign(\d*)""".r
   val Title = """^title(\d*)$""".r
   val Spouse = """^spouse""".r
-  val Issue = """^issue$""".r
+  val Issue = """^issue$|^children$""".r
   val House = """^house$|^dynasty$""".r
   val Father = """^father$""".r
   val Mother = """^mother$""".r
@@ -178,6 +178,22 @@ object RoyaltyRegexHelper {
   val DeathDate = """^death_date$""".r
   val DeathPlace = """^death_place$""".r
   val Religion = """^religion$""".r
+
+  val Occupation = """^occupation$""".r
+  // known_for
+  // parents
+  // relatives
+  // alma_mater
+  // residence
+  // nationality
+  // awards
+  // ethnicity
+  // employer
+  // citizenship
+  // website
+  // years_active
+  // birth_name
+  // death_cause
 }
 
 import extractor.WikiExtractor.getNum

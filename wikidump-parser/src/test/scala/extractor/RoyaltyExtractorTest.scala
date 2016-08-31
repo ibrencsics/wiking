@@ -213,48 +213,102 @@ object RoyaltyExtractorTest {
           .build))
 
 
+    list.add(
+      Array("""
+{{Infobox monarch
+|name            = Basil I
+|succession      = [[Byzantine Emperor]]
+|image           = Solidus-Basil I with Constantine and Eudoxia-sb1703.jpg
+|caption         = Basil, his son Constantine, and his second wife, Empress Eudokia Ingerina.
+|reign           = 867–886
+|predecessor     = [[Michael III]]
+|successor       = [[Leo VI the Wise]]
+|queen           = [[Eudokia Ingerina]]
+|spouse 1        = Maria
+|spouse 2        = [[Eudokia Ingerina]]
+|issue           = [[Leo VI the Wise|Emperor Leo VI]]&lt;br&gt;[[Alexander (Byzantine emperor)|Emperor Alexander]]&lt;br&gt;[[Stephen I of Constantinople|Patriarch Stephen I]]
+|issue-link      =#Family
+|dynasty         = [[Macedonian dynasty]]
+|father          =
+|mother          =
+|birth_date      = 811
+|birth_place     = [[Macedonia (theme)|Macedonia]]
+|death_date      = {{death-date|August 29, 886|August 29, 886}} (aged 75)
+|death_place     =
+|date of burial  =
+|place of burial =
+|}}""",
+      new RoyaltyBuilder()
+          .withName(List(Text("Basil I")))
+          .withPredecessor(0, List(Link("Michael III", None)))
+          .withSuccessor(0, List(Link("Leo VI the Wise", None)))
+          .withReign(0, List(Timeframe(Date("","","867",true), Date("","","886",true))))
+          .withSuccession(0, List(Link("Byzantine Emperor", None)))
+          .withSpouse(List(Text("Maria"), Link("Eudokia Ingerina", None)))
+          .withIssue(List(Link("Leo VI the Wise", Some("Emperor Leo VI")), Link("Alexander (Byzantine emperor)", Some("Emperor Alexander")), Link("Stephen I of Constantinople", Some("Patriarch Stephen I"))))
+          .withHouse(List(Link("Macedonian dynasty", None)))
+          .withFather(List())
+          .withMother(List())
+          .withBirthDate(List(Date("","","811",true)))
+          .withBirthPlace(List(Link("Macedonia (theme)", Some("Macedonia"))))
+          .withDeathDate(List(Date("29","August","886",true), Text("(aged 75)")))
+          .withDeathPlace(List())
+        .build))
 
-    /*
-  {{Infobox monarch
-  |name            = Basil I
-  |succession      = [[Byzantine Emperor]]
-  |image           = Solidus-Basil I with Constantine and Eudoxia-sb1703.jpg
-  |caption         = Basil, his son Constantine, and his second wife, Empress Eudokia Ingerina.
-  |reign           = 867–886
-  |predecessor     = [[Michael III]]
-  |successor       = [[Leo VI the Wise]]
-  |queen           = [[Eudokia Ingerina]]
-  |spouse 1        = Maria
-  |spouse 2        = [[Eudokia Ingerina]]
-  |issue           = [[Leo VI the Wise|Emperor Leo VI]]&lt;br&gt;[[Alexander (Byzantine emperor)|Emperor Alexander]]&lt;br&gt;[[Stephen I of Constantinople|Patriarch Stephen I]]
-  |issue-link      =#Family
-  |dynasty         = [[Macedonian dynasty]]
-  |father          =
-  |mother          =
-  |birth_date      = 811
-  |birth_place     = [[Macedonia (theme)|Macedonia]]
-  |death_date      = {{death-date|August 29, 886|August 29, 886}} (aged 75)
-  |death_place     =
-  |date of burial  =
-  |place of burial =
-  |}}
 
+    list.add(
+      Array("""
+{{Infobox person
+| name             = Akira Kurosawa&lt;br/&gt;{{lang|ja|黒澤 明}}
+| image            = Akirakurosawa-onthesetof7samurai-1953-page88.jpg
+| caption          = Akira Kurosawa on the set of ''Seven Samurai'' in 1953
+| parents          = Isamu Kurosawa&lt;br/&gt;Shima Kurosawa
+| birth_date       = {{Birth date|1910|3|23}}
+| birth_place      = [[Shinagawa]], Tokyo, Japan
+| death_date       = {{Death date and age|1998|9|6|1910|3|23}}
+| death_place      = [[Setagaya]], Tokyo, Japan
+| death_cause      = Stroke
+| occupation       = Director, screenwriter, producer, editor
+| years_active     = 1936–93
+| spouse           = [[Yōko Yaguchi]] (1945–85; her death)
+| children         = [[Kazuko Kurosawa]]&lt;br&gt;Hisao Kurosawa
+| relatives        = Yu Kurosawa (singer, granddaughter), Takayuki Kato (actor, grandson)}}
+            """,
+      new RoyaltyBuilder()
+          .withName(List(Text("Akira Kurosawa"), Template("lang|ja|黒澤 明")))
+          .withBirthDate(List(Date("23","3","1910",true)))
+          .withBirthPlace(List(Link("Shinagawa", None), Text(", Tokyo, Japan"))) // postprocess
+          .withDeathDate(List(Date("6","9","1998",true)))
+          .withDeathPlace(List(Link("Setagaya", None), Text(", Tokyo, Japan")))
+          .withSpouse(List(Link("Yōko Yaguchi", None), Text("(1945–85; her death)")))
+          .withIssue(List(Link("Kazuko Kurosawa", None), Text("Hisao Kurosawa")))
+          .build))
 
-  {{Infobox monarch
-  |name            =Leo V
-  |title           =[[Emperor]] of the [[Byzantine Empire]]
-  |image= Leo V solidus.jpg
-  |caption         =Gold ''[[solidus (coin)|solidus]]'' of Leo V, with his son and co-emperor, [[Constantine (son of Leo V)|Constantine]]
-  |reign           =813 – 25 December 820
-  |predecessor     =[[Michael I Rangabe]]
-  |successor       =[[Michael II]]
-  |queen           =[[Theodosia, wife of Leo V|Theodosia]]
-  |issue           =[[Constantine (son of Leo V)|Symbatios-Constantine]]&lt;br/&gt;Basil&lt;br/&gt;Gregory&lt;br/&gt;Theodosios
-  |father          =Bardas
-  |birth_date   =775
-  |death_date   =25 December 820 (aged 45)
-  |}}
-
+/*
+{{Infobox person
+ | name             = Ada, Countess of Lovelace
+ | image            = Ada Lovelace portrait.jpg
+ | caption          = Ada, Countess of Lovelace, 1840
+ | birth_name       = The Hon. Augusta Ada Byron
+|birth_date={{birth date|1815|12|10|df=yes}}
+ | birth_place      = London, England
+ | death_date       = {{death date and age|1852|11|27|1815|12|10|df=yes}}
+ | death_place      = [[Marylebone]], London, England
+ | resting_place    = [[Church of St. Mary Magdalene, Hucknall]], Nottingham, England
+ | title            = Countess of Lovelace
+| children         =
+  {{plainlist |
+* [[Byron King-Noel, Viscount Ockham|Byron King-Noel, Viscount Ockham and 12th Baron Wentworth]]
+* [[Anne Blunt, 15th Baroness Wentworth]]
+* [[Ralph King-Milbanke, 2nd Earl of Lovelace]]}}
+ | parents          =
+  {{plainlist |
+* [[Lord Byron|George Gordon Byron, 6th Baron Byron]]
+* [[Anne Isabella Byron, Baroness Byron|Anne Isabella Milbanke, 11th Baroness Wentworth]]
+  }}
+ | known for           = [[Mathematics]]&lt;br&gt;[[Computing]]
+ | spouse           = [[William King-Noel, 1st Earl of Lovelace]]
+ }}
 
 
 
