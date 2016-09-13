@@ -1,0 +1,6 @@
+mysql:
+http://severalnines.com/blog/mysql-docker-containers-understanding-basics
+docker run --detach --name=test-mysql --env="MYSQL_ROOT_PASSWORD=mypassword" --publish 6603:3306 mysql
+mysql -uroot -pmypassword -h 127.0.0.1 -P 6603
+
+neo4j:

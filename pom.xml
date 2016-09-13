@@ -9,6 +9,7 @@
 
     <modules>
         <module>wikidump-parser</module>
+        <module>wiking-neo4j</module>
     </modules>
 
     <properties>
@@ -22,35 +23,62 @@
         <scala.complete.version>${scala.minor.version}.7</scala.complete.version>
 		<scala.test.version>2.2.6</scala.test.version>
 		<junit.version>4.12</junit.version>
+
+        <anorm.version>2.5.2</anorm.version>
+        <anormcypher.version>0.9.1</anormcypher.version>
+        <neo4j.java.driver.version>1.0.5</neo4j.java.driver.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scalap</artifactId>
-            <version>${scala.complete.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <version>${scala.complete.version}</version>
-        </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scalap</artifactId>
+                <version>${scala.complete.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.complete.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
-            <version>${scala.test.version}</version>
-            <scope>test</scope>
-        </dependency>
+            <dependency>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest_2.11</artifactId>
+                <version>${scala.test.version}</version>
+                <scope>test</scope>
+            </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
 
-        <!--<dependency>-->
+            <dependency>
+                <groupId>org.neo4j.driver</groupId>
+                <artifactId>neo4j-java-driver</artifactId>
+                <version>${neo4j.java.driver.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anormcypher</groupId>
+                <artifactId>anormcypher_2.11</artifactId>
+                <version>${anormcypher.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.typesafe.play</groupId>
+                <artifactId>anorm_2.11</artifactId>
+                <version>${anorm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.39</version>
+            </dependency>
+
+
+            <!--<dependency>-->
             <!--<groupId>edu.umd</groupId>-->
             <!--<artifactId>cloud9</artifactId>-->
             <!--<version>1.5.0</version>-->

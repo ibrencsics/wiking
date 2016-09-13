@@ -25,9 +25,9 @@ class XmlParser {
           processor(buf)
           buf.clear
         }
-        case e @ EvElemStart(_, tag, _, _) => {
+        case e @ EvElemStart(_, tag, attrs, _) => {
           if (insidePage) {
-            buf += ("<" + tag + ">")
+            buf += ("<" + tag + "" + attrs + ">")
           }
         }
         case e @ EvElemEnd(_, tag) => {

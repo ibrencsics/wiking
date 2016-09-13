@@ -272,8 +272,7 @@ object RoyaltyExtractorTest {
 | years_active     = 1936–93
 | spouse           = [[Yōko Yaguchi]] (1945–85; her death)
 | children         = [[Kazuko Kurosawa]]&lt;br&gt;Hisao Kurosawa
-| relatives        = Yu Kurosawa (singer, granddaughter), Takayuki Kato (actor, grandson)}}
-            """,
+| relatives        = Yu Kurosawa (singer, granddaughter), Takayuki Kato (actor, grandson)}}""",
       new RoyaltyBuilder()
           .withName(List(Text("Akira Kurosawa"), Template("lang|ja|黒澤 明")))
           .withBirthDate(List(Date("23","3","1910",true)))
@@ -282,9 +281,12 @@ object RoyaltyExtractorTest {
           .withDeathPlace(List(Link("Setagaya", None), Text(", Tokyo, Japan")))
           .withSpouse(List(Link("Yōko Yaguchi", None), Text("(1945–85; her death)")))
           .withIssue(List(Link("Kazuko Kurosawa", None), Text("Hisao Kurosawa")))
+          .withParents(List(Text("Isamu Kurosawa"), Text("Shima Kurosawa")))
           .build))
 
-/*
+
+    list.add(
+      Array("""
 {{Infobox person
  | name             = Ada, Countess of Lovelace
  | image            = Ada Lovelace portrait.jpg
@@ -308,10 +310,69 @@ object RoyaltyExtractorTest {
   }}
  | known for           = [[Mathematics]]&lt;br&gt;[[Computing]]
  | spouse           = [[William King-Noel, 1st Earl of Lovelace]]
- }}
+ }}""",
+        new RoyaltyBuilder()
+            .withName(List(Text("Ada, Countess of Lovelace")))
+            .withBirthDate(List(Date("10","12","1815",true)))
+            .withBirthPlace(List(Text("London, England")))
+            .withDeathDate(List(Date("27","11","1852",true)))
+            .withDeathPlace(List(Link("Marylebone", None), Text(", London, England")))
+            .withIssue(List(People(List(
+              Link("Byron King-Noel, Viscount Ockham", Some("Byron King-Noel, Viscount Ockham and 12th Baron Wentworth")),
+              Link("Anne Blunt, 15th Baroness Wentworth", None),
+              Link("Ralph King-Milbanke, 2nd Earl of Lovelace", None)))))
+            .withSpouse(List(Link("William King-Noel, 1st Earl of Lovelace", None)))
+            .withKnownFor(List(Link("Mathematics", None), Link("Computing", None)))
+            .withParents(List(People(List(
+              Link("Lord Byron", Some("George Gordon Byron, 6th Baron Byron")),
+              Link("Anne Isabella Byron, Baroness Byron", Some("Anne Isabella Milbanke, 11th Baroness Wentworth"))))))
+          .build))
 
-
-
+//    list.add(
+//      Array(
+//        """{{Infobox royalty
+//          ||name           =Charles V
+//          ||image          =Elderly Karl V.jpg
+//          ||caption        =
+//          ||reign          ={{nowrap|28 June 1519 – 27 August 1556{{small|&lt;ref&gt;Date of Charles's abdication; on 24 February 1558, the college of electors assembled at Frankfort accepted the instrument of Charles V's
+//          |imperial resignation and declared the election of Ferdinand as emperor [https://books.google.com/books?id=DUwLAAAAIAAJ&amp;pg=PA716 p. 716], [https://books.google.com/books?id=nPwQAAAAIAAJ&amp;pg=PA182 p. 182]&l
+//          |t;/ref&gt;}}}}
+//          ||coronation     =26 October 1520 {{small|(Germany)}}&lt;br&gt;22 February 1530 {{small|(Italy)}}&lt;br&gt;24 February 1530 {{small|(Empire)}}
+//          ||succession     =[[Holy Roman Emperor]]&lt;br&gt;[[King of Germany]] and [[King of Italy|Italy]]
+//          ||predecessor    =[[Maximilian I, Holy Roman Emperor|Maximilian I]]
+//          ||successor      =[[Ferdinand I, Holy Roman Emperor|Ferdinand I]]
+//          ||succession1    =[[Archduke of Austria]]
+//          ||reign1         =12 January 1519 – 28 April 1521
+//          ||predecessor1   =[[Maximilian I, Holy Roman Emperor|Maximilian I]]
+//          ||successor1     =[[Ferdinand I, Holy Roman Emperor|Ferdinand I]]
+//          ||succession2    =[[King of Spain]]
+//          ||reign2         =23 January 1516 – &lt;br&gt; 16 January 1556
+//          ||predecessor2   =[[Joanna I of Castile|Joanna I]]
+//          ||successor2     =[[Philip II of Spain|Philip II]]
+//          ||reg-type2      =Co-monarch
+//          ||regent2        =[[Joanna I of Castile|Joanna I]]
+//          ||succession3    =[[Seventeen Provinces|Lord of the Netherlands]] &lt;br&gt;[[Duke of Burgundy]]
+//          ||reign3         =25 September 1506 –&lt;br&gt; 25 October 1555{{small|&lt;ref&gt;{{cite book|url=https://books.google.com/books?id=idjdQOYlK-4C&amp;pg=PA39 |title=Abdication of Brussels |publisher= |accessdate=8
+//          | June 2012}}&lt;/ref&gt;}}
+//          ||predecessor3   =[[Philip I of Castile|Philip IV]]
+//          ||successor3     =[[Philip II of Spain|Philip V]]
+//          ||spouse         =[[Isabella of Portugal]]
+//          ||issue          =[[Philip II of Spain]]&lt;br /&gt;[[Maria of Austria, Holy Roman Empress]]&lt;br /&gt;[[Joanna of Austria, Princess of Portugal|Joanna, Princess of Portugal]]&lt;br /&gt;[[John of Austria]] (''i
+//          |llegitimate'')&lt;br /&gt;[[Margaret of Parma|Margaret, Duchess of Parma]] (''illegitimate'')
+//          ||house          =[[House of Habsburg]]
+//          ||father         =[[Philip I of Castile]]
+//          ||mother         =[[Joanna I of Castile]]
+//          ||birth_date     =24 February 1500
+//          ||birth_place    =[[Ghent]], [[County of Flanders|Flanders]], [[Habsburg Netherlands]]
+//          ||death_date     =21 September 1558 (aged 58)
+//          ||death_place    =[[Monastery of Yuste|Yuste]], Spain
+//          ||place of burial=[[El Escorial]], [[San Lorenzo de El Escorial]], Spain
+//          ||religion       =[[Roman Catholicism]]
+//          ||signature      =Firma_Emperador_Carlos_V.svg
+//          |}}""",
+//        new RoyaltyBuilder().build)
+//    )
+/*
      */
 
 

@@ -22,6 +22,10 @@ class RoyaltyBuilder {
   var deathPlace: Free = null
   var religion: Free = null
 
+  var knownFor: Free = null
+  var parents: Free = null
+
+
   def withName(name: Free): RoyaltyBuilder = {
     this.name = name
     this
@@ -98,6 +102,16 @@ class RoyaltyBuilder {
     this
   }
 
+  def withKnownFor(knownFor: Free): RoyaltyBuilder = {
+    this.knownFor = knownFor
+    this
+  }
+
+  def withParents(parents: Free): RoyaltyBuilder = {
+    this.parents = parents
+    this
+  }
+
   def build: Royalty = new Royalty(this)
 }
 
@@ -117,6 +131,8 @@ class Royalty(builder: RoyaltyBuilder) {
   var deathDate = builder.deathDate
   var deathPlace = builder.deathPlace
   var religion = builder.religion
+  var knownFor = builder.knownFor
+  var parents = builder.parents
 
   def canEqual(a: Any) = a.isInstanceOf[Royalty]
 
@@ -137,7 +153,9 @@ class Royalty(builder: RoyaltyBuilder) {
       that.birthPlace == this.birthPlace &&
       that.deathDate == this.deathDate &&
       that.deathPlace == this.deathPlace &&
-      that.religion == this.religion
+      that.religion == this.religion &&
+      that.knownFor == this.knownFor &&
+      that.parents == this.parents
     }
     case _ => false
   }
@@ -157,11 +175,14 @@ class Royalty(builder: RoyaltyBuilder) {
     s"birthPlace: ${birthPlace}\n" +
     s"deathDate: ${deathDate}\n" +
     s"deathPlace: ${deathPlace}\n" +
-    s"religion: ${religion}\n"
+    s"religion: ${religion}\n" +
+    s"knownFor: ${knownFor}\n" +
+    s"parents: ${parents}\n"
   }
 }
 
 object RoyaltyRegexHelper {
+// Royalty, monarch
   val Succession = """succession(\d*)""".r
   val Predecessor = """predecessor(\d*)""".r
   val Successor = """successor(\d*)""".r
@@ -179,8 +200,10 @@ object RoyaltyRegexHelper {
   val DeathPlace = """^death_place$""".r
   val Religion = """^religion$""".r
 
-  val Occupation = """^occupation$""".r
-  // known_for
+// Person
+//  val Occupation = """^occupation$""".r
+  val KnownFor = """^known[_\s]for$""".r
+  val Parents = """^parents$""".r
   // parents
   // relatives
   // alma_mater
@@ -194,11 +217,41 @@ object RoyaltyRegexHelper {
   // years_active
   // birth_name
   // death_cause
+
+// Officeholder, Politician
+  // office
+  // profession
+  // party
+  // officen, term_startn, term_endn, termn, presidentn, predecessorn, successorn, deputyn, ordern, primeministern, vicepresidentn, leadern, chancellorn, alongsiden
+  // relations
+  // allegiance
+  // branch
+  // serviceyears
+  // rank
+  // fields, workplaces
+  // cabinet
+
+// Writer
+  // genre
+  // notableworks
+  // influences
+  // influenced
+  // subject
+  // movement
+
+// Scientist
+// Military person
+// Christian leader
+// Artist
+// Philosopher
+// Musical artist
+// Minister
+// Governor
+// Prime minister
 }
 
 import extractor.WikiExtractor.getNum
 
-import scala.collection.mutable.ListBuffer
 
 object Succession {
   def unapply(raw: String): Option[Int] = getNum(RoyaltyRegexHelper.Succession, raw)
@@ -264,6 +317,14 @@ object Religion {
   def unapply(raw: String): Option[String] = RoyaltyRegexHelper.Religion.findFirstIn(raw)
 }
 
+object KnownFor {
+  def unapply(raw: String): Option[String] = RoyaltyRegexHelper.KnownFor.findFirstIn(raw)
+}
+
+object Parents {
+  def unapply(raw: String): Option[String] = RoyaltyRegexHelper.Parents.findFirstIn(raw)
+}
+
 
 class RoyaltyExtractor {
 
@@ -289,6 +350,8 @@ class RoyaltyExtractor {
         case (DeathDate(str), elements) => builder.withDeathDate(elements)
         case (DeathPlace(str), elements) => builder.withDeathPlace(elements)
         case (Religion(str), elements) => {builder.withReligion(elements)}
+        case (KnownFor(str), elements) => {builder.withKnownFor(elements)}
+        case (Parents(str), elements) => {builder.withParents(elements)}
         case _ => //println("no match")
       }
     }
