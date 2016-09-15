@@ -51,6 +51,13 @@ object PersonDumper extends App {
 
   def persistToNeo(buf: ArrayBuffer[String]): Unit = {
 
+    def getRealName(alias: String): String = {
+      statement.setString(1, alias)
+      val res = statement.executeQuery()
+
+      if (res.next()) res.getString(1) else alias
+    }
+
     val s = buf.mkString
     val x = XML.loadString(s)
 
@@ -87,9 +94,22 @@ object PersonDumper extends App {
 
 
     royalty.father.foreach{case Link(p,a) => Cypher(
-      s"""merge (father:${Tag}{name: "${p}"})
+      s"""merge (father:${Tag}{name: "${getRealName(p)}"})
          |merge (child:${Tag}{name: "${realPageTitle}"})
          |merge (child)-[:HAS_FATHER]->(father)""".stripMargin)()}
+
+    royalty.mother.foreach{case Link(p,a) => Cypher(
+      s"""merge (mother:${Tag}{name: "${getRealName(p)}"})
+          |merge (child:${Tag}{name: "${realPageTitle}"})
+          |merge (child)-[:HAS_MOTHER]->(mother)""".stripMargin)()}
+
+    royalty.spouse.foreach{
+      case Link(p,a) => Cypher(
+        s"""merge (s1:${Tag}{name: "${getRealName(p)}"})
+            |merge (s2:${Tag}{name: "${realPageTitle}"})
+            |merge (s1)-[:HAS_SPOUSE]-(s2)""".stripMargin)()
+      case _ =>
+    }
 
 //    val res2 = Cypher(s"""match (n:${Tag}{name: "${pageTitle}"}) return n.name""")()
 //    println(res2.map(row => {row[String]("n.name")}).toList)
