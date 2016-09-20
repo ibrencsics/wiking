@@ -4,3 +4,4 @@ docker run --detach --name=test-mysql --env="MYSQL_ROOT_PASSWORD=mypassword" --p
 mysql -uroot -pmypassword -h 127.0.0.1 -P 6603
 
 neo4j:
+match (n)-[r*1..6]-(m) where n.name="Charles V, Holy Roman Emperor" return r, n

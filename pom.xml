@@ -10,6 +10,7 @@
     <modules>
         <module>wikidump-parser</module>
         <module>wiking-neo4j</module>
+        <module>wiking-rest</module>
     </modules>
 
     <properties>

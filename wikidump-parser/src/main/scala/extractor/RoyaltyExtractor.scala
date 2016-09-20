@@ -136,6 +136,12 @@ class Royalty(builder: RoyaltyBuilder) {
 
   def canEqual(a: Any) = a.isInstanceOf[Royalty]
 
+  def getBirthDate = Option(birthDate)
+  def getDeathDate = Option(deathDate)
+  def getMother = Option(mother)
+  def getFather = Option(father)
+  def getSpouse = Option(spouse)
+
   override def equals(that: Any): Boolean = that match {
     case that: Royalty => {
       that.canEqual(this) &&
@@ -248,6 +254,7 @@ object RoyaltyRegexHelper {
 // Minister
 // Governor
 // Prime minister
+// Chancellor
 }
 
 import extractor.WikiExtractor.getNum

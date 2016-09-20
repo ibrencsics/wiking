@@ -287,6 +287,12 @@ object RoyaltyExtractorTest {
 
     list.add(
       Array("""
+        |{{Infobox royalty
+        |}}
+      """, new RoyaltyBuilder().build))
+
+    list.add(
+      Array("""
 {{Infobox person
  | name             = Ada, Countess of Lovelace
  | image            = Ada Lovelace portrait.jpg

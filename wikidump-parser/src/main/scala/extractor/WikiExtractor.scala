@@ -24,7 +24,77 @@ case class Text(plain: String) extends Element
 case class Sep(data: String) extends Element
 case class Of(plain: String) extends Element
 case class Lf(plain: String) extends Element
-case class Date(day: String, month: String, year: String, ad: Boolean) extends Element
+case class Date(day: String, month: String, year: String, ad: Boolean) extends Element {
+  val R_NUM = """(\d+)""".r
+  val R_JANUARY = """[Jj]anuary""".r
+  val R_FEBRUARY = """[Ff]ebruary""".r
+  val R_MARCH = """[Mm]arch""".r
+  val R_APRIL = """[Aa]pril""".r
+  val R_MAY = """[Mm]ay""".r
+  val R_JUNE = """[Jj]une""".r
+  val R_JULY = """[Jj]uly""".r
+  val R_AUGUST = """[Aa]ugust""".r
+  val R_SEPTEMBER = """[Ss]eptember""".r
+  val R_OCTOBER = """[Oo]ctober""".r
+  val R_NOVEMBER = """[Nn]ovember""".r
+  val R_DECEMBER = """[Dd]ecember""".r
+
+  override def toString(): String = {
+    def monthToNum(name: String): Int = name match {
+      case R_NUM(m) => Integer.valueOf(m)
+      case R_JANUARY() => 1
+      case R_FEBRUARY() => 2
+      case R_MARCH() => 3
+      case R_APRIL() => 4
+      case R_MAY() => 5
+      case R_JUNE() => 6
+      case R_JULY() => 7
+      case R_AUGUST() => 8
+      case R_SEPTEMBER() => 9
+      case R_OCTOBER() => 10
+      case R_NOVEMBER() => 11
+      case R_DECEMBER() => 12
+      case _ => 0
+    }
+
+    val intDay: Int = day match {
+      case R_NUM(i) => Integer.valueOf(i)
+      case _ => 0
+    }
+    val intMonth = monthToNum(month)
+    val intYear: Int = year match {
+      case R_NUM(i) => Integer.valueOf(i)
+      case _ => 0
+    }
+
+    val strDay = if (intDay > 0) f"$intDay%02d." else ""
+    val strMonth = if (intMonth > 0) f"$intMonth%02d." else ""
+    val strAd = if (ad) "" else " BC"
+
+//    f"$intDay%02d.$intMonth%02d.$intYear%d$strAd"
+    s"${strDay}${strMonth}${intYear}${strAd}"
+  }
+
+  override def equals(that: Any): Boolean = {
+    that match {
+      case that: Date => that.canEqual(this) && this.toString() == that.toString()
+      case _ => false
+    }
+  }
+}
+object Date {
+  def apply(serialized: String): Date = {
+    def nullToEmpty(nullable: String): String = if (nullable != null) nullable.substring(0, nullable.size-1) else ""
+
+    val pattern = """(\d{1,2}\.)?(\d{1,2}\.)?(\d{1,4})\s*(BC)?""".r
+    serialized match {
+      case pattern(d,m,y,ad) => {
+        println(s"${d} ${m} ${y} ${ad}")
+        this(nullToEmpty(d), nullToEmpty(m), y, ad==null)
+      }
+    }
+  }
+}
 case class Timeframe(from: Date, to: Date) extends Element
 case class Circa(date: Element) extends Element
 case class People(people: List[Element]) extends Element
@@ -327,7 +397,9 @@ class WikiExtractor {
       pos += 1
     }
 
-    addToList(processedText.substring(startPos, pos - 2).trim, list)
+    if (startPos > -1) {
+      addToList(processedText.substring(startPos, pos - 2).trim, list)
+    }
 
     new ParsedTemplate(name, list.result)
   }
